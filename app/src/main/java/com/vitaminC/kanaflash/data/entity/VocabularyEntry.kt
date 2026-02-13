@@ -1,9 +1,12 @@
 package com.vitaminC.kanaflash.data.entity
-
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 /**
- * Represents a vocabulary item that can be shown in flashcards.
+ * Room entity that stores vocabulary items shown in flashcards.
  */
+@Entity(tableName = "vocabulary_entries")
 data class VocabularyEntry(
+    @PrimaryKey
     val id: Long,
     val romaji: String,
     val hiragana: String,
