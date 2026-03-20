@@ -1,4 +1,5 @@
 package com.vitaminC.kanaflash.data.entity
+
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 /**
@@ -6,8 +7,8 @@ import androidx.room.PrimaryKey
  */
 @Entity(tableName = "vocabulary_entries")
 data class VocabularyEntry(
-    @PrimaryKey
-    val id: Long,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
     val romaji: String,
     val hiragana: String,
     val meaning: String?

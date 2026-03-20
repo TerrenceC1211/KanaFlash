@@ -14,6 +14,9 @@ interface VocabularyDao {
     @Query("SELECT * FROM vocabulary_entries ORDER BY id ASC")
     fun observeAll(): Flow<List<VocabularyEntry>>
 
+    @Query("SELECT * FROM vocabulary_entries ORDER BY id ASC")
+    suspend fun getAll(): List<VocabularyEntry>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: VocabularyEntry)
 
@@ -22,4 +25,8 @@ interface VocabularyDao {
 
     @Delete
     suspend fun delete(entry: VocabularyEntry)
+
+    @Query("SELECT * FROM vocabulary_entries WHERE id = :id")
+    suspend fun getById(id: Long): VocabularyEntry?
+
 }
