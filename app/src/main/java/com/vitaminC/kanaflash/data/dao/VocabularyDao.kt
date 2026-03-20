@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface VocabularyDao {
-//    @Query("SELECT * FROM vocabulary_entries ORDER BY id ASC")
+    @Query("SELECT * FROM vocabulary_entries ORDER BY id ASC")
     fun observeAll(): Flow<List<VocabularyEntry>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
