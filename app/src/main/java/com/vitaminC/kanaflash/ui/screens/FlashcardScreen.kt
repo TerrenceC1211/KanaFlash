@@ -154,37 +154,39 @@ fun FlashcardScreen(
                     ) {
 
 
-                    Text(
-                            text = "Romaji",
+                        Text(
+                            text = "Hiragana",
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                         Text(
-                            text = currentCard.romaji,
+                            text = currentCard.hiragana,
                             style = MaterialTheme.typography.headlineLarge,
+                            color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center
                         )
 
-
                         if (isAnswerVisible) {
                             Text(
-                                text = "Hiragana",
+                                text = "Romaji",
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(top = 8.dp)
+                                modifier = Modifier.padding(top = 16.dp)
                             )
 
                             Text(
-                                text = currentCard.hiragana,
+                                text = currentCard.romaji,
                                 style = MaterialTheme.typography.headlineMedium,
-                                color = MaterialTheme.colorScheme.primary
+                                textAlign = TextAlign.Center
                             )
 
                             Text(
                                 text = currentCard.meaning ?: "No meaning added",
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 12.dp),
+                                textAlign = TextAlign.Center
                             )
                         } else {
                             Text(
@@ -195,13 +197,12 @@ fun FlashcardScreen(
                             )
 
                             Text(
-                                text = "Tap anywhere on the card to reveal the answer.",
+                                text = "Tap anywhere on the card to reveal the Romaji answer.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 6.dp),
                                 textAlign = TextAlign.Center
                             )
-
                         }
                     }
                 }
