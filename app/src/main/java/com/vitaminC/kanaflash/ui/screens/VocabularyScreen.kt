@@ -13,7 +13,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -30,15 +30,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Icon
+
 import com.vitaminC.kanaflash.data.entity.VocabularyEntry
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
+
+import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
+import com.vitaminC.kanaflash.ui.navigation.AppSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VocabularyScreen(
     factory: VocabularyViewModelFactory,
-    onBackToMenu: () -> Unit
+    onHomeClick: () -> Unit,
+    onLearnClick: () -> Unit
 ) {
     val viewModel: VocabularyViewModel = viewModel(factory = factory)
     val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
@@ -51,23 +59,31 @@ fun VocabularyScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Vocabulary Deck") },
-                actions = {
-                    TextButton(onClick = onBackToMenu) {
-                        Text("Menu")
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
+        bottomBar = {
+            KanaFlashBottomBar(
+                activeSection = AppSection.DECK,
+                onDeckClick = { },
+                onHomeClick = onHomeClick,
+                onLearnClick = onLearnClick
+            )
+        },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            FloatingActionButton(
                 onClick = { showAddDialog = true }
             ) {
-                Text("Add Word")
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add vocabulary"
+                )
             }
         }
+
+
 
     ) { innerPadding ->
         if (vocabularyList.isEmpty()) {

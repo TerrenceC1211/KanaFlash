@@ -42,6 +42,9 @@ import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import kotlinx.coroutines.delay
 
+import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
+import com.vitaminC.kanaflash.ui.navigation.AppSection
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -75,12 +78,14 @@ fun HomeScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            HomeBottomBar(
-                onVocabularyClick = onVocabularyClick,
+            KanaFlashBottomBar(
+                activeSection = AppSection.HOME,
+                onDeckClick = onVocabularyClick,
                 onHomeClick = { },
                 onLearnClick = { showLearnSheet = true }
             )
         }
+
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -268,51 +273,3 @@ private fun EmptyPreviewCard() {
     }
 }
 
-@Composable
-private fun HomeBottomBar(
-    onVocabularyClick: () -> Unit,
-    onHomeClick: () -> Unit,
-    onLearnClick: () -> Unit
-) {
-    Surface(
-        tonalElevation = 8.dp,
-        color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextButton(
-                onClick = onVocabularyClick,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Deck")
-            }
-
-            Surface(
-                modifier = Modifier.size(62.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
-                onClick = onHomeClick
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "KF",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            TextButton(
-                onClick = onLearnClick,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Learn")
-            }
-        }
-    }
-}

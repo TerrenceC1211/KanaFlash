@@ -36,13 +36,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitaminC.kanaflash.data.entity.VocabularyEntry
 import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModelFactory
+import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
+import com.vitaminC.kanaflash.ui.navigation.AppSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FlashcardScreen(
     factory: FlashcardViewModelFactory,
-    onBackToMenu: () -> Unit
-) {
+    onDeckClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onLearnClick: () -> Unit
+)
+ {
     val viewModel: FlashcardViewModel = viewModel(factory = factory)
     val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
 
@@ -68,17 +73,22 @@ fun FlashcardScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Flashcard Study") },
-                actions = {
-                    TextButton(onClick = onBackToMenu) {
-                        Text("Menu")
-                    }
-                },
+
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
-        }
-    ) { innerPadding ->
+        },
+        bottomBar = {
+            KanaFlashBottomBar(
+                activeSection = AppSection.LEARN,
+                onDeckClick = onDeckClick,
+                onHomeClick = onHomeClick,
+                onLearnClick = onLearnClick
+            )
+        },
+
+        ) { innerPadding ->
         if (deck.isEmpty()) {
             Column(
                 modifier = Modifier
@@ -98,9 +108,10 @@ fun FlashcardScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
                 )
-                Button(onClick = onBackToMenu) {
-                    Text("Back to Menu")
+                Button(onClick = onDeckClick) {
+                    Text("Go to Deck")
                 }
+
             }
         } else {
             val currentCard = deck[currentIndex]

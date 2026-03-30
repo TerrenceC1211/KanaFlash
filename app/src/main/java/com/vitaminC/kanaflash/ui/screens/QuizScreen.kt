@@ -34,6 +34,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitaminC.kanaflash.data.entity.VocabularyEntry
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModelFactory
+import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
+import com.vitaminC.kanaflash.ui.navigation.AppSection
 
 private data class QuizQuestion(
     val prompt: VocabularyEntry,
@@ -45,7 +47,9 @@ private data class QuizQuestion(
 @Composable
 fun QuizScreen(
     factory: QuizViewModelFactory,
-    onBackToMenu: () -> Unit,
+    onDeckClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onLearnClick: () -> Unit,
     onQuizFinished: (Int, Int) -> Unit
 ) {
     val viewModel: QuizViewModel = viewModel(factory = factory)
@@ -93,17 +97,21 @@ fun QuizScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Quiz Mode") },
-                actions = {
-                    TextButton(onClick = onBackToMenu) {
-                        Text("Menu")
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
-        }
-    ) { innerPadding ->
+        },
+        bottomBar = {
+            KanaFlashBottomBar(
+                activeSection = AppSection.LEARN,
+                onDeckClick = onDeckClick,
+                onHomeClick = onHomeClick,
+                onLearnClick = onLearnClick
+            )
+        },
+
+        ) { innerPadding ->
         when {
             vocabularyList.size < 4 -> {
                 Column(
@@ -124,9 +132,10 @@ fun QuizScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
                     )
-                    Button(onClick = onBackToMenu) {
-                        Text("Back to Menu")
+                    Button(onClick = onDeckClick) {
+                        Text("Go to Deck")
                     }
+
                 }
             }
 
@@ -149,9 +158,10 @@ fun QuizScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
                     )
-                    Button(onClick = onBackToMenu) {
-                        Text("Back to Menu")
+                    Button(onClick = onDeckClick) {
+                        Text("Go to Deck")
                     }
+
                 }
             }
 

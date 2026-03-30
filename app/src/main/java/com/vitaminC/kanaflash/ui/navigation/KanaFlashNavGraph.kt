@@ -47,31 +47,54 @@ fun KanaFlashNavGraph(
         composable(KanaFlashRoutes.VOCABULARY) {
             VocabularyScreen(
                 factory = vocabularyFactory,
-                onBackToMenu = {
-                    navController.popBackStack()
+                onHomeClick = {
+                    navController.navigate(KanaFlashRoutes.HOME) {
+                        popUpTo(KanaFlashRoutes.HOME) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onLearnClick = {
+                    navController.navigate(KanaFlashRoutes.FLASHCARDS)
                 }
             )
         }
 
-        composable(KanaFlashRoutes.FLASHCARDS) {
-            FlashcardScreen(
-                factory = flashcardFactory,
-                onBackToMenu = {
-                    navController.popBackStack()
-                }
-            )
-        }
+
+            composable(KanaFlashRoutes.FLASHCARDS) {
+                FlashcardScreen(
+                    factory = flashcardFactory,
+                    onDeckClick = {
+                        navController.navigate(KanaFlashRoutes.VOCABULARY)
+                    },
+                    onHomeClick = {
+                        navController.navigate(KanaFlashRoutes.HOME) {
+                            popUpTo(KanaFlashRoutes.HOME) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    },
+                    onLearnClick = { }
+                )
+
+            }
 
         composable(KanaFlashRoutes.QUIZ) {
             QuizScreen(
                 factory = quizFactory,
-                onBackToMenu = {
-                    navController.popBackStack()
+                onDeckClick = {
+                    navController.navigate(KanaFlashRoutes.VOCABULARY)
                 },
+                onHomeClick = {
+                    navController.navigate(KanaFlashRoutes.HOME) {
+                        popUpTo(KanaFlashRoutes.HOME) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onLearnClick = { },
                 onQuizFinished = { score, total ->
                     navController.navigate(KanaFlashRoutes.resultRoute(score, total))
                 }
             )
+
         }
 
         composable(
@@ -87,17 +110,21 @@ fun KanaFlashNavGraph(
             ResultScreen(
                 score = score,
                 total = total,
-                onBackToMenu = {
+                onDeckClick = {
+                    navController.navigate(KanaFlashRoutes.VOCABULARY)
+                },
+                onHomeClick = {
                     navController.navigate(KanaFlashRoutes.HOME) {
-                        popUpTo(KanaFlashRoutes.HOME) {
-                            inclusive = true
-                        }
+                        popUpTo(KanaFlashRoutes.HOME) { inclusive = false }
+                        launchSingleTop = true
                     }
                 },
+                onLearnClick = { },
                 onRetryQuiz = {
                     navController.popBackStack()
                 }
             )
+
         }
     }
 }

@@ -21,15 +21,20 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
+import com.vitaminC.kanaflash.ui.navigation.AppSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultScreen(
     score: Int,
     total: Int,
-    onBackToMenu: () -> Unit,
+    onDeckClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onLearnClick: () -> Unit,
     onRetryQuiz: () -> Unit
-) {
+)
+{
     val percentage = if (total > 0) (score * 100) / total else 0
 
     val performanceMessage = when {
@@ -44,8 +49,17 @@ fun ResultScreen(
             TopAppBar(
                 title = { Text("Result Summary") }
             )
-        }
-    ) { innerPadding ->
+        },
+        bottomBar = {
+            KanaFlashBottomBar(
+                activeSection = AppSection.LEARN,
+                onDeckClick = onDeckClick,
+                onHomeClick = onHomeClick,
+                onLearnClick = onLearnClick
+            )
+        },
+
+        ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -112,11 +126,12 @@ fun ResultScreen(
             }
 
             OutlinedButton(
-                onClick = onBackToMenu,
+                onClick = onHomeClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Back to Menu")
+                Text("Back to Home")
             }
+
         }
     }
 }
