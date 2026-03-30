@@ -208,16 +208,16 @@ private fun VocabularyEntryDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
-                    value = romaji,
-                    onValueChange = { romaji = it },
-                    label = { Text("Romaji") },
+                    value = hiragana,
+                    onValueChange = { hiragana = it },
+                    label = { Text("Hiragana") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
-                    value = hiragana,
-                    onValueChange = { hiragana = it },
-                    label = { Text("Hiragana") },
+                    value = romaji,
+                    onValueChange = { romaji = it },
+                    label = { Text("Romaji") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -228,6 +228,7 @@ private fun VocabularyEntryDialog(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
+
             }
         },
         confirmButton = {
