@@ -8,6 +8,7 @@ import com.vitaminC.kanaflash.data.db.AppDatabaseProvider
 import com.vitaminC.kanaflash.data.repository.VocabularyRepository
 import com.vitaminC.kanaflash.ui.navigation.KanaFlashNavGraph
 import com.vitaminC.kanaflash.ui.theme.KanaFlashTheme
+import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
 
 class MainActivity : ComponentActivity() {
@@ -17,11 +18,16 @@ class MainActivity : ComponentActivity() {
 
         val database = AppDatabaseProvider.getDatabase(this)
         val repository = VocabularyRepository(database.vocabularyDao())
-        val factory = VocabularyViewModelFactory(repository)
+
+        val vocabularyFactory = VocabularyViewModelFactory(repository)
+        val flashcardFactory = FlashcardViewModelFactory(repository)
 
         setContent {
             KanaFlashTheme {
-                KanaFlashNavGraph(factory = factory)
+                KanaFlashNavGraph(
+                    vocabularyFactory = vocabularyFactory,
+                    flashcardFactory = flashcardFactory
+                )
             }
         }
     }

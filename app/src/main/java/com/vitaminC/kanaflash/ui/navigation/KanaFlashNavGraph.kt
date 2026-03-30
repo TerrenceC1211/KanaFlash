@@ -9,11 +9,13 @@ import com.vitaminC.kanaflash.ui.screens.HomeScreen
 import com.vitaminC.kanaflash.ui.screens.QuizScreen
 import com.vitaminC.kanaflash.ui.screens.ResultScreen
 import com.vitaminC.kanaflash.ui.screens.VocabularyScreen
+import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
 
 @Composable
 fun KanaFlashNavGraph(
-    factory: VocabularyViewModelFactory
+    vocabularyFactory: VocabularyViewModelFactory,
+    flashcardFactory: FlashcardViewModelFactory
 ) {
     val navController = rememberNavController()
 
@@ -37,7 +39,7 @@ fun KanaFlashNavGraph(
 
         composable(KanaFlashRoutes.VOCABULARY) {
             VocabularyScreen(
-                factory = factory,
+                factory = vocabularyFactory,
                 onBackToMenu = {
                     navController.popBackStack()
                 }
@@ -46,6 +48,7 @@ fun KanaFlashNavGraph(
 
         composable(KanaFlashRoutes.FLASHCARDS) {
             FlashcardScreen(
+                factory = flashcardFactory,
                 onBackToMenu = {
                     navController.popBackStack()
                 }
