@@ -12,11 +12,13 @@ import com.vitaminC.kanaflash.ui.screens.QuizScreen
 import com.vitaminC.kanaflash.ui.screens.ResultScreen
 import com.vitaminC.kanaflash.ui.screens.VocabularyScreen
 import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModelFactory
+import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
 
 @Composable
 fun KanaFlashNavGraph(
+    homeFactory: HomeViewModelFactory,
     vocabularyFactory: VocabularyViewModelFactory,
     flashcardFactory: FlashcardViewModelFactory,
     quizFactory: QuizViewModelFactory
@@ -29,6 +31,7 @@ fun KanaFlashNavGraph(
     ) {
         composable(KanaFlashRoutes.HOME) {
             HomeScreen(
+                factory = homeFactory,
                 onVocabularyClick = {
                     navController.navigate(KanaFlashRoutes.VOCABULARY)
                 },

@@ -9,6 +9,7 @@ import com.vitaminC.kanaflash.data.repository.VocabularyRepository
 import com.vitaminC.kanaflash.ui.navigation.KanaFlashNavGraph
 import com.vitaminC.kanaflash.ui.theme.KanaFlashTheme
 import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModelFactory
+import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
 
@@ -20,6 +21,7 @@ class MainActivity : ComponentActivity() {
         val database = AppDatabaseProvider.getDatabase(this)
         val repository = VocabularyRepository(database.vocabularyDao())
 
+        val homeFactory = HomeViewModelFactory(repository)
         val vocabularyFactory = VocabularyViewModelFactory(repository)
         val flashcardFactory = FlashcardViewModelFactory(repository)
         val quizFactory = QuizViewModelFactory(repository)
@@ -27,6 +29,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             KanaFlashTheme {
                 KanaFlashNavGraph(
+                    homeFactory = homeFactory,
                     vocabularyFactory = vocabularyFactory,
                     flashcardFactory = flashcardFactory,
                     quizFactory = quizFactory
@@ -35,3 +38,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+

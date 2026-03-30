@@ -4,99 +4,315 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.vitaminC.kanaflash.ui.components.MenuFeatureCard
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vitaminC.kanaflash.data.entity.VocabularyEntry
+import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModel
+import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
+import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    factory: HomeViewModelFactory,
     onVocabularyClick: () -> Unit,
     onFlashcardsClick: () -> Unit,
     onQuizClick: () -> Unit
 ) {
-    val heroBrush = Brush.linearGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
-            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f)
-        )
-    )
+    val viewModel: HomeViewModel = viewModel(factory = factory)
+    val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
 
-    Scaffold { innerPadding ->
+    var showLearnSheet by rememberSaveable { mutableStateOf(false) }
+    var currentIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    val previewDeck = remember(vocabularyList) {
+        if (vocabularyList.isEmpty()) emptyList() else vocabularyList.shuffled()
+    }
+
+    LaunchedEffect(previewDeck) {
+        currentIndex = 0
+        if (previewDeck.size > 1) {
+            while (true) {
+                delay(2500)
+                currentIndex = (currentIndex + 1) % previewDeck.size
+            }
+        }
+    }
+
+    val currentCard = if (previewDeck.isNotEmpty()) previewDeck[currentIndex] else null
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = {
+            HomeBottomBar(
+                onVocabularyClick = onVocabularyClick,
+                onHomeClick = { },
+                onLearnClick = { showLearnSheet = true }
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 4.dp,
-                shape = MaterialTheme.shapes.extraLarge
+            Text(
+                text = "KanaFlash",
+                style = MaterialTheme.typography.headlineLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 12.dp)
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(heroBrush)
-                        .padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                if (currentCard == null) {
+                    EmptyPreviewCard()
+                } else {
+                    FlashPreviewDeck(card = currentCard)
+                }
+            }
+        }
+    }
+
+    if (showLearnSheet) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+        ModalBottomSheet(
+            onDismissRequest = { showLearnSheet = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text(
+                    text = "Learn",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+
+                Text(
+                    text = "Choose how you want to study your saved vocabulary.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Button(
+                    onClick = {
+                        showLearnSheet = false
+                        onFlashcardsClick()
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f))
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "Japanese Study Companion",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    Text("Flashcards")
+                }
 
-                    Text(
-                        text = "KanaFlash",
-                        style = MaterialTheme.typography.headlineLarge
-                    )
+                TextButton(
+                    onClick = {
+                        showLearnSheet = false
+                        onQuizClick()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Quiz")
+                }
+            }
+        }
+    }
+}
 
+@Composable
+private fun FlashPreviewDeck(
+    card: VocabularyEntry
+) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        ElevatedCard(
+            modifier = Modifier
+                .fillMaxWidth(0.72f)
+                .offset(x = (-110).dp, y = 8.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+            ),
+            shape = RoundedCornerShape(28.dp),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
+        ) {
+            Box(modifier = Modifier.padding(vertical = 54.dp))
+        }
+
+        ElevatedCard(
+            modifier = Modifier
+                .fillMaxWidth(0.72f)
+                .offset(x = 110.dp, y = 8.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+            ),
+            shape = RoundedCornerShape(28.dp),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
+        ) {
+            Box(modifier = Modifier.padding(vertical = 54.dp))
+        }
+
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(0.82f),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            shape = RoundedCornerShape(30.dp),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 28.dp, vertical = 34.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = card.hiragana,
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = card.romaji,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = card.meaning ?: "No meaning added",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyPreviewCard() {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(0.82f),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(30.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 28.dp, vertical = 34.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "No vocabulary yet",
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = "Add words to your deck and they will appear here automatically.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeBottomBar(
+    onVocabularyClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onLearnClick: () -> Unit
+) {
+    Surface(
+        tonalElevation = 8.dp,
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                onClick = onVocabularyClick,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Deck")
+            }
+
+            Surface(
+                modifier = Modifier.size(62.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                onClick = onHomeClick
+            ) {
+                Box(contentAlignment = Alignment.Center) {
                     Text(
-                        text = "Build your own vocabulary deck, review flashcards, and test recall with quick quizzes.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "KF",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
-            MenuFeatureCard(
-                title = "Vocabulary Deck",
-                description = "Add, edit, and organize Romaji, Hiragana, and meanings.",
-                onClick = onVocabularyClick
-            )
-
-            MenuFeatureCard(
-                title = "Flashcard Study",
-                description = "Review words one by one with a cleaner focused study flow.",
-                onClick = onFlashcardsClick
-            )
-
-            MenuFeatureCard(
-                title = "Quiz Mode",
-                description = "Test recall with multiple-choice questions and track results.",
-                onClick = onQuizClick
-            )
+            TextButton(
+                onClick = onLearnClick,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Learn")
+            }
         }
     }
 }
