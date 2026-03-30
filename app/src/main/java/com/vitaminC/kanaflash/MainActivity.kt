@@ -1,54 +1,28 @@
 package com.vitaminC.kanaflash
 
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.vitaminC.kanaflash.data.db.AppDatabaseProvider
+import com.vitaminC.kanaflash.data.repository.VocabularyRepository
+import com.vitaminC.kanaflash.ui.screens.VocabularyScreen
 import com.vitaminC.kanaflash.ui.theme.KanaFlashTheme
-
-
+import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
-
         enableEdgeToEdge()
+
+        val database = AppDatabaseProvider.getDatabase(this)
+        val repository = VocabularyRepository(database.vocabularyDao())
+        val factory = VocabularyViewModelFactory(repository)
+
         setContent {
             KanaFlashTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "KanaFlash",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                VocabularyScreen(factory = factory)
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Welcome to $name",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    KanaFlashTheme {
-        Greeting("KanaFlash")
     }
 }
