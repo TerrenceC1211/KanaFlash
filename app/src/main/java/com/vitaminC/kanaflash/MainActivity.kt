@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.vitaminC.kanaflash.data.db.AppDatabaseProvider
 import com.vitaminC.kanaflash.data.repository.VocabularyRepository
-import com.vitaminC.kanaflash.ui.screens.VocabularyScreen
+import com.vitaminC.kanaflash.ui.navigation.KanaFlashNavGraph
 import com.vitaminC.kanaflash.ui.theme.KanaFlashTheme
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
 
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             KanaFlashTheme {
-                VocabularyScreen(factory = factory)
+                KanaFlashNavGraph(factory = factory)
             }
         }
     }

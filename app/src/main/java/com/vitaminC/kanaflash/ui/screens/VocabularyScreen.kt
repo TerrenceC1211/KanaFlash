@@ -1,5 +1,6 @@
 package com.vitaminC.kanaflash.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,15 +10,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +37,8 @@ import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VocabularyScreen(
-    factory: VocabularyViewModelFactory
+    factory: VocabularyViewModelFactory,
+    onBackToMenu: () -> Unit
 ) {
     val viewModel: VocabularyViewModel = viewModel(factory = factory)
     val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
@@ -43,43 +47,57 @@ fun VocabularyScreen(
     var editingEntry by remember { mutableStateOf<VocabularyEntry?>(null) }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("KanaFlash Vocabulary") }
+                title = { Text("Vocabulary Deck") },
+                actions = {
+                    TextButton(onClick = onBackToMenu) {
+                        Text("Menu")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = { showAddDialog = true }
             ) {
-                Text("Add")
+                Text("Add Word")
             }
         }
+
     ) { innerPadding ->
         if (vocabularyList.isEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(innerPadding)
-                    .padding(16.dp),
+                    .padding(20.dp),
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "No vocabulary added yet.",
-                    style = MaterialTheme.typography.titleMedium
+                    text = "Your deck is empty.",
+                    style = MaterialTheme.typography.headlineMedium
                 )
                 Text(
-                    text = "Tap the Add button to create your first entry.",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Start by adding a Romaji and Hiragana pair to build your study list.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 10.dp)
                 )
             }
         } else {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(innerPadding)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 items(vocabularyList, key = { it.id }) { entry ->
                     VocabularyItemCard(
@@ -127,25 +145,32 @@ private fun VocabularyItemCard(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth()
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Romaji: ${entry.romaji}",
-                style = MaterialTheme.typography.titleMedium
+                text = entry.hiragana,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Hiragana: ${entry.hiragana}",
-                style = MaterialTheme.typography.bodyLarge
+                text = entry.romaji,
+                style = MaterialTheme.typography.titleLarge
             )
             Text(
-                text = "Meaning: ${entry.meaning ?: "-"}",
-                style = MaterialTheme.typography.bodyMedium
+                text = entry.meaning ?: "No meaning added",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -181,24 +206,27 @@ private fun VocabularyEntryDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = romaji,
                     onValueChange = { romaji = it },
                     label = { Text("Romaji") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
                 OutlinedTextField(
                     value = hiragana,
                     onValueChange = { hiragana = it },
                     label = { Text("Hiragana") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
                 OutlinedTextField(
                     value = meaning,
                     onValueChange = { meaning = it },
                     label = { Text("Meaning (Optional)") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
             }
         },
