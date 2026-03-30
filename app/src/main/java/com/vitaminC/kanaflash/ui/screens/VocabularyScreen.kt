@@ -57,6 +57,8 @@ fun VocabularyScreen(
 
     var showAddDialog by remember { mutableStateOf(false) }
     var editingEntry by remember { mutableStateOf<VocabularyEntry?>(null) }
+    var entryPendingDelete by remember { mutableStateOf<VocabularyEntry?>(null) }
+
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -123,8 +125,9 @@ fun VocabularyScreen(
                     VocabularyItemCard(
                         entry = entry,
                         onEditClick = { editingEntry = entry },
-                        onDeleteClick = { viewModel.deleteEntry(entry) }
+                        onDeleteClick = { entryPendingDelete = entry }
                     )
+
                 }
             }
         }
@@ -157,6 +160,36 @@ fun VocabularyScreen(
             }
         )
     }
+
+    entryPendingDelete?.let { entry ->
+        AlertDialog(
+            onDismissRequest = { entryPendingDelete = null },
+            title = {
+                Text("Delete Vocabulary")
+            },
+            text = {
+                Text("Are you sure you want to delete \"${entry.hiragana} (${entry.romaji})\"?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteEntry(entry)
+                        entryPendingDelete = null
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { entryPendingDelete = null }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
 }
 
 @Composable
