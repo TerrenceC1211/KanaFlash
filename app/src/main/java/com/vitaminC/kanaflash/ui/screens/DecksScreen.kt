@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,12 +12,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -29,7 +33,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,7 +44,6 @@ import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
 import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.DeckViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.DeckViewModelFactory
-import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +57,8 @@ fun DecksScreen(
     val deckList by viewModel.deckList.collectAsStateWithLifecycle()
 
     var showAddDialog by remember { mutableStateOf(false) }
+    var deckPendingRename by remember { mutableStateOf<Deck?>(null) }
+    var deckPendingDelete by remember { mutableStateOf<Deck?>(null) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -83,7 +90,6 @@ fun DecksScreen(
                     contentDescription = "Add deck"
                 )
             }
-
         }
     ) { innerPadding ->
         if (deckList.isEmpty()) {
@@ -107,7 +113,11 @@ fun DecksScreen(
                     modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
                 )
 
-                FloatingActionButton(onClick = { showAddDialog = true }) {
+                FloatingActionButton(
+                    onClick = { showAddDialog = true },
+                    containerColor = Color(0xFF5F7F5F).copy(alpha = 0.9f),
+                    contentColor = Color(0xFFFFFBF5)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Create first deck"
@@ -131,7 +141,10 @@ fun DecksScreen(
                 items(deckList, key = { it.id }) { deck ->
                     DeckItemCard(
                         deck = deck,
-                        onClick = { onDeckClick(deck.id) }
+                        canDelete = deckList.size > 1,
+                        onClick = { onDeckClick(deck.id) },
+                        onEditClick = { deckPendingRename = deck },
+                        onDeleteClick = { deckPendingDelete = deck }
                     )
                 }
             }
@@ -139,7 +152,11 @@ fun DecksScreen(
     }
 
     if (showAddDialog) {
-        AddDeckDialog(
+        DeckTitleDialog(
+            title = "Create Deck",
+            confirmLabel = "Create",
+            initialTitle = "",
+            supportingText = "Give this deck a short title, like Greetings, School, or Travel.",
             onDismiss = { showAddDialog = false },
             onConfirm = { title ->
                 viewModel.addDeck(title)
@@ -147,12 +164,58 @@ fun DecksScreen(
             }
         )
     }
+
+    deckPendingRename?.let { deck ->
+        DeckTitleDialog(
+            title = "Rename Deck",
+            confirmLabel = "Save",
+            initialTitle = deck.title,
+            supportingText = "Update the deck title below.",
+            onDismiss = { deckPendingRename = null },
+            onConfirm = { newTitle ->
+                viewModel.renameDeck(deck, newTitle)
+                deckPendingRename = null
+            }
+        )
+    }
+
+    deckPendingDelete?.let { deck ->
+        AlertDialog(
+            onDismissRequest = { deckPendingDelete = null },
+            title = { Text("Delete Deck") },
+            text = {
+                Text("Deleting \"${deck.title}\" will also delete all vocabulary inside it. This cannot be undone.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteDeck(deck)
+                        deckPendingDelete = null
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deckPendingDelete = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (deckList.size == 1 && deckPendingDelete == null) {
+        // no-op, just keeps the last-deck rule explicit in the screen logic
+    }
 }
 
 @Composable
 private fun DeckItemCard(
     deck: Deck,
-    onClick: () -> Unit
+    canDelete: Boolean,
+    onClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -162,48 +225,87 @@ private fun DeckItemCard(
         ),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 5.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
         ) {
-            Text(
-                text = deck.title,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = deck.title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
 
-            Text(
-                text = "Tap to manage words",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                Text(
+                    text = "Tap to manage words",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onEditClick) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Rename deck",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                IconButton(
+                    onClick = onDeleteClick,
+                    enabled = canDelete
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = if (canDelete) "Delete deck" else "Cannot delete last deck",
+                        tint = if (canDelete) {
+                            MaterialTheme.colorScheme.tertiary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+                        }
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun AddDeckDialog(
+private fun DeckTitleDialog(
+    title: String,
+    confirmLabel: String,
+    initialTitle: String,
+    supportingText: String,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
-    var title by remember { mutableStateOf("") }
-    val trimmedTitle = title.trim()
+    var deckTitle by remember(initialTitle, title) { mutableStateOf(initialTitle) }
+    val trimmedTitle = deckTitle.trim()
     val isValid = trimmedTitle.isNotBlank()
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create Deck") },
+        title = { Text(title) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = "Give this deck a short title, like Greetings, School, or Travel.",
+                    text = supportingText,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
+                    value = deckTitle,
+                    onValueChange = { deckTitle = it },
                     label = { Text("Deck Title") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -215,7 +317,7 @@ private fun AddDeckDialog(
                 onClick = { onConfirm(trimmedTitle) },
                 enabled = isValid
             ) {
-                Text("Create")
+                Text(confirmLabel)
             }
         },
         dismissButton = {

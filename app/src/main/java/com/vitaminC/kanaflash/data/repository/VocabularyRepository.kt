@@ -70,6 +70,14 @@ class VocabularyRepository(
         return deckDao.insert(deck)
     }
 
+    suspend fun updateDeck(deck: Deck) {
+        deckDao.update(deck)
+    }
+
+    suspend fun deleteDeck(deck: Deck) {
+        deckDao.delete(deck)
+    }
+
     suspend fun getVocabularyForSelection(deckId: Long?): List<VocabularyEntry> {
         return if (deckId == null) {
             vocabularyDao.getAll()
@@ -78,4 +86,3 @@ class VocabularyRepository(
         }
     }
 }
-

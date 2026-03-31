@@ -29,6 +29,21 @@ class DeckViewModel(
             repository.insertDeck(Deck(title = trimmedTitle))
         }
     }
+
+    fun renameDeck(deck: Deck, newTitle: String) {
+        val trimmedTitle = newTitle.trim()
+        if (trimmedTitle.isBlank()) return
+
+        viewModelScope.launch {
+            repository.updateDeck(deck.copy(title = trimmedTitle))
+        }
+    }
+
+    fun deleteDeck(deck: Deck) {
+        viewModelScope.launch {
+            repository.deleteDeck(deck)
+        }
+    }
 }
 
 class DeckViewModelFactory(
