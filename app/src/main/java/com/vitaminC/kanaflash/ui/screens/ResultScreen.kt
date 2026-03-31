@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
@@ -63,6 +64,24 @@ fun ResultScreen(
         percentage >= 50 -> "Growing"
         else -> "Practice"
     }
+
+    val scoreColors = when {
+        percentage >= 80 -> listOf(
+            Color(0xFF7FB77E),
+            Color(0xFF4F8A54)
+        )
+        percentage >= 50 -> listOf(
+            Color(0xFFE7B65C),
+            Color(0xFFC98B2E)
+        )
+        else -> listOf(
+            Color(0xFFE68A7A),
+            Color(0xFFC85C4A)
+        )
+    }
+
+    val scoreBrush = Brush.linearGradient(scoreColors)
+    val scoreTint = scoreColors.last()
 
     val backgroundBrush = Brush.verticalGradient(
         colors = listOf(
@@ -128,8 +147,14 @@ fun ResultScreen(
                     Surface(
                         modifier = Modifier.size(156.dp),
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
-                    ) {}
+                        color = Color.Transparent
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(scoreBrush, CircleShape)
+                        )
+                    }
 
                     Surface(
                         modifier = Modifier.size(122.dp),
@@ -144,13 +169,13 @@ fun ResultScreen(
                             Text(
                                 text = "$percentage%",
                                 style = MaterialTheme.typography.headlineLarge,
-                                color = MaterialTheme.colorScheme.primary
+                                color = scoreTint
                             )
 
                             Text(
                                 text = percentageLabel,
                                 style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = scoreTint.copy(alpha = 0.85f)
                             )
                         }
                     }
