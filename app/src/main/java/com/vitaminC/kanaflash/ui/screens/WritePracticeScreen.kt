@@ -293,28 +293,29 @@ private fun WritingPad(
                     modifier = Modifier
                         .fillMaxSize()
                         .pointerInput(Unit) {
+                            var activePath: Path? = null
+
                             detectDragGestures(
                                 onDragStart = { offset: Offset ->
-                                    val path = Path().apply {
+                                    activePath = Path().apply {
                                         moveTo(offset.x, offset.y)
                                     }
-                                    onCurrentPathChange(path)
+                                    onCurrentPathChange(activePath)
                                 },
                                 onDrag = { change, _ ->
                                     change.consume()
-                                    val updatedPath = currentPath ?: Path().apply {
-                                        moveTo(change.position.x, change.position.y)
-                                    }
-                                    updatedPath.lineTo(change.position.x, change.position.y)
-                                    onCurrentPathChange(updatedPath)
+                                    activePath?.lineTo(change.position.x, change.position.y)
+                                    onCurrentPathChange(activePath)
                                 },
                                 onDragEnd = {
-                                    currentPath?.let { finishedPath ->
+                                    activePath?.let { finishedPath ->
                                         onStrokeFinished(Path().apply { addPath(finishedPath) })
                                     }
+                                    activePath = null
                                     onCurrentPathChange(null)
                                 },
                                 onDragCancel = {
+                                    activePath = null
                                     onCurrentPathChange(null)
                                 }
                             )
@@ -344,6 +345,7 @@ private fun WritingPad(
                         )
                     }
                 }
+
             }
 
             if (isAnswerVisible) {
