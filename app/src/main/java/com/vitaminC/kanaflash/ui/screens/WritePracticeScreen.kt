@@ -300,16 +300,26 @@ private fun WritingPad(
                                     activePath = Path().apply {
                                         moveTo(offset.x, offset.y)
                                     }
-                                    onCurrentPathChange(activePath)
+                                    onCurrentPathChange(
+                                        Path().apply {
+                                            activePath?.let { addPath(it) }
+                                        }
+                                    )
                                 },
                                 onDrag = { change, _ ->
                                     change.consume()
                                     activePath?.lineTo(change.position.x, change.position.y)
-                                    onCurrentPathChange(activePath)
+                                    onCurrentPathChange(
+                                        Path().apply {
+                                            activePath?.let { addPath(it) }
+                                        }
+                                    )
                                 },
                                 onDragEnd = {
                                     activePath?.let { finishedPath ->
-                                        onStrokeFinished(Path().apply { addPath(finishedPath) })
+                                        onStrokeFinished(
+                                            Path().apply { addPath(finishedPath) }
+                                        )
                                     }
                                     activePath = null
                                     onCurrentPathChange(null)
@@ -345,7 +355,6 @@ private fun WritingPad(
                         )
                     }
                 }
-
             }
 
             if (isAnswerVisible) {
