@@ -61,7 +61,7 @@ fun QuizScreen(
     onQuizFinished: (Int, Int) -> Unit
 ) {
     val viewModel: QuizViewModel = viewModel(factory = factory)
-    val vocabularyList = viewModel.vocabularyList
+    val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
     val deckList by viewModel.deckList.collectAsStateWithLifecycle()
 
     var currentQuestionIndex by rememberSaveable { mutableIntStateOf(0) }

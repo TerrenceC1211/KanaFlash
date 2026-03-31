@@ -60,7 +60,7 @@ fun HomeScreen(
     onLearnClick: () -> Unit
 ) {
     val viewModel: HomeViewModel = viewModel(factory = factory)
-    val vocabularyList = viewModel.vocabularyList
+    val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
     val deckList by viewModel.deckList.collectAsStateWithLifecycle()
 
     var currentIndex by rememberSaveable { mutableIntStateOf(0) }

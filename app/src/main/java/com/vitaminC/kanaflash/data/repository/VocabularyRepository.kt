@@ -26,6 +26,14 @@ class VocabularyRepository(
         return vocabularyDao.getByDeck(deckId)
     }
 
+    fun observeVocabularyForSelection(deckId: Long?): Flow<List<VocabularyEntry>> {
+        return if (deckId == null) {
+            vocabularyDao.observeAll()
+        } else {
+            vocabularyDao.observeByDeck(deckId)
+        }
+    }
+
     suspend fun getById(id: Long): VocabularyEntry? {
         return vocabularyDao.getById(id)
     }
@@ -70,3 +78,4 @@ class VocabularyRepository(
         }
     }
 }
+

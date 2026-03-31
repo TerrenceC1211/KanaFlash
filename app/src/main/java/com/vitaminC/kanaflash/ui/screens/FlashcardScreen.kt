@@ -54,7 +54,7 @@ fun FlashcardScreen(
     onLearnClick: () -> Unit
 ) {
     val viewModel: FlashcardViewModel = viewModel(factory = factory)
-    val vocabularyList = viewModel.vocabularyList
+    val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
     val deckList by viewModel.deckList.collectAsStateWithLifecycle()
 
     var isShuffled by rememberSaveable { mutableStateOf(false) }

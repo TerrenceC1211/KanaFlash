@@ -9,10 +9,11 @@ import androidx.lifecycle.viewModelScope
 import com.vitaminC.kanaflash.data.entity.Deck
 import com.vitaminC.kanaflash.data.entity.VocabularyEntry
 import com.vitaminC.kanaflash.data.repository.VocabularyRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 class QuizViewModel(
     private val repository: VocabularyRepository
@@ -25,25 +26,25 @@ class QuizViewModel(
             initialValue = emptyList()
         )
 
+    private val selectedDeckIdFlow = MutableStateFlow<Long?>(null)
+
     var selectedDeckId by mutableStateOf<Long?>(null)
         private set
 
-    var vocabularyList by mutableStateOf<List<VocabularyEntry>>(emptyList())
-        private set
-
-    init {
-        loadVocabulary()
-    }
+    val vocabularyList: StateFlow<List<VocabularyEntry>> =
+        selectedDeckIdFlow
+            .flatMapLatest { deckId ->
+                repository.observeVocabularyForSelection(deckId)
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList()
+            )
 
     fun setSelectedDeck(deckId: Long?) {
         selectedDeckId = deckId
-        loadVocabulary()
-    }
-
-    private fun loadVocabulary() {
-        viewModelScope.launch {
-            vocabularyList = repository.getVocabularyForSelection(selectedDeckId)
-        }
+        selectedDeckIdFlow.value = deckId
     }
 }
 
