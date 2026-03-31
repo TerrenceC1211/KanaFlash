@@ -39,11 +39,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitaminC.kanaflash.data.entity.VocabularyEntry
+import com.vitaminC.kanaflash.ui.components.DeckSelectionMenu
 import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
 import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModelFactory
-import com.vitaminC.kanaflash.ui.components.DeckSelectionMenu
 
 private data class QuizQuestion(
     val prompt: VocabularyEntry,
@@ -110,6 +110,8 @@ fun QuizScreen(
         )
     )
 
+    val scrollState = rememberScrollState()
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -129,86 +131,79 @@ fun QuizScreen(
             )
         }
     ) { innerPadding ->
-        when {
-            vocabularyList.size < 4 -> {
-                QuizMessageState(
-                    title = "Not enough vocabulary for quiz mode",
-                    description = "Please add at least 4 saved words before starting a quiz session.",
-                    buttonLabel = "Go to Deck",
-                    onButtonClick = onDeckClick,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(innerPadding)
-                        .padding(horizontal = 24.dp, vertical = 20.dp)
-                )
-            }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(innerPadding)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(260.dp)
+                    .background(backgroundBrush)
+            )
 
-            questions.isEmpty() -> {
-                QuizMessageState(
-                    title = "Quiz could not be generated",
-                    description = "Try adding more varied vocabulary entries, then start the quiz again.",
-                    buttonLabel = "Go to Deck",
-                    onButtonClick = onDeckClick,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(innerPadding)
-                        .padding(horizontal = 24.dp, vertical = 20.dp)
-                )
-            }
-
-            else -> {
-                val currentQuestion = questions[currentQuestionIndex]
-                val correctAnswer = currentQuestion.correctAnswer
-                val isLastQuestion = currentQuestionIndex == questions.lastIndex
-                val scrollState = rememberScrollState()
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(innerPadding)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp, vertical = 16.dp)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(260.dp)
-                            .background(backgroundBrush)
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 20.dp, vertical = 16.dp)
-                            .verticalScroll(scrollState),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    Surface(
+                        shape = RoundedCornerShape(999.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(999.dp),
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
-                            ) {
-                                Text(
-                                    text = "Question ${currentQuestionIndex + 1} of ${questions.size}",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                                )
-                            }
-                        }
-                        DeckSelectionMenu(
-                            deckList = deckList,
-                            selectedDeckId = viewModel.selectedDeckId,
-                            onDeckSelected = { deckId ->
-                                viewModel.setSelectedDeck(deckId)
+                        Text(
+                            text = if (questions.isNotEmpty()) {
+                                "Question ${currentQuestionIndex + 1} of ${questions.size}"
+                            } else {
+                                "Quiz unavailable"
                             },
-                            label = "Quiz Deck"
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                         )
+                    }
+                }
 
+                DeckSelectionMenu(
+                    deckList = deckList,
+                    selectedDeckId = viewModel.selectedDeckId,
+                    onDeckSelected = { deckId ->
+                        viewModel.setSelectedDeck(deckId)
+                    },
+                    label = "Quiz Deck"
+                )
+
+                when {
+                    vocabularyList.size < 4 -> {
+                        QuizMessageState(
+                            title = "Not enough vocabulary for this deck",
+                            description = "Please add at least 4 saved words, or switch to another deck or All Decks.",
+                            buttonLabel = "Go to Deck",
+                            onButtonClick = onDeckClick
+                        )
+                    }
+
+                    questions.isEmpty() -> {
+                        QuizMessageState(
+                            title = "Quiz could not be generated",
+                            description = "Try another deck or add more varied vocabulary entries first.",
+                            buttonLabel = "Go to Deck",
+                            onButtonClick = onDeckClick
+                        )
+                    }
+
+                    else -> {
+                        val currentQuestion = questions[currentQuestionIndex]
+                        val correctAnswer = currentQuestion.correctAnswer
+                        val isLastQuestion = currentQuestionIndex == questions.lastIndex
 
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth(),
@@ -329,22 +324,24 @@ fun QuizScreen(
                             }
                         }
 
-                        if (isLastQuestion) {
-                            Button(
-                                onClick = { onQuizFinished(score, questions.size) },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text("Finish Quiz")
-                            }
-                        } else {
-                            OutlinedButton(
-                                onClick = {
-                                    currentQuestionIndex += 1
-                                    selectedAnswer = null
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text("Next Question")
+                        if (selectedAnswer != null) {
+                            if (isLastQuestion) {
+                                Button(
+                                    onClick = { onQuizFinished(score, questions.size) },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("Finish Quiz")
+                                }
+                            } else {
+                                OutlinedButton(
+                                    onClick = {
+                                        currentQuestionIndex += 1
+                                        selectedAnswer = null
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("Next Question")
+                                }
                             }
                         }
                     }
@@ -353,7 +350,6 @@ fun QuizScreen(
         }
     }
 }
-
 
 @Composable
 private fun QuizMessageState(
@@ -365,7 +361,7 @@ private fun QuizMessageState(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
             text = title,
@@ -375,8 +371,7 @@ private fun QuizMessageState(
         Text(
             text = description,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Button(onClick = onButtonClick) {

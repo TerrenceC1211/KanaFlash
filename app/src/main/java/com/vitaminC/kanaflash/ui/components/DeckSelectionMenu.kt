@@ -31,7 +31,7 @@ fun DeckSelectionMenu(
     deckList: List<Deck>,
     selectedDeckId: Long?,
     onDeckSelected: (Long?) -> Unit,
-    label: String = "Study Deck"
+    label: String? = "Study Deck"
 ) {
     var showSheet by rememberSaveable { mutableStateOf(false) }
 
@@ -41,18 +41,23 @@ fun DeckSelectionMenu(
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        if (!label.isNullOrBlank()) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
 
         Surface(
             onClick = { showSheet = true },
-            shape = RoundedCornerShape(22.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
             tonalElevation = 0.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -90,7 +95,7 @@ fun DeckSelectionMenu(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    text = label,
+                    text = label ?: "Choose Deck",
                     style = MaterialTheme.typography.headlineMedium
                 )
 

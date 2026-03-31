@@ -139,7 +139,7 @@ fun VocabularyScreen(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                     ) {
                         Text(
-                            text = "$deckTitle • ${vocabularyList.size} saved word" + if (vocabularyList.size == 1) "" else "s",
+                            text = "${vocabularyList.size} word" + if (vocabularyList.size == 1) "" else "s" + " in $deckTitle",
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
@@ -237,8 +237,12 @@ private fun EmptyVocabularyState(
             modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
         )
 
-        FloatingActionButton(onClick = onAddWordClick) {
+        FloatingActionButton(
+            onClick = onAddWordClick,
+            containerColor = Color(0xFF5F7F5F).copy(alpha = 0.9f),
+            contentColor = Color(0xFFFFFBF5)) {
             Icon(
+
                 imageVector = Icons.Default.Add,
                 contentDescription = "Add first vocabulary"
             )

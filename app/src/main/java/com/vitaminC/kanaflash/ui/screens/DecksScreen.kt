@@ -173,7 +173,7 @@ private fun DeckItemCard(
             )
 
             Text(
-                text = "Open deck",
+                text = "Tap to manage words",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

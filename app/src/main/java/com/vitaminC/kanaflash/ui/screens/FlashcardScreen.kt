@@ -101,64 +101,62 @@ fun FlashcardScreen(
             )
         }
     ) { innerPadding ->
-        if (deck.isEmpty()) {
-            EmptyFlashcardState(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(innerPadding)
-                    .padding(horizontal = 24.dp, vertical = 20.dp),
-                onDeckClick = onDeckClick
-            )
-        } else {
-            val currentCard = deck[currentIndex]
-
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(innerPadding)
+        ) {
             Box(
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .height(280.dp)
+                    .background(backgroundBrush)
+            )
+
+            Column(
+                modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(innerPadding)
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(280.dp)
-                        .background(backgroundBrush)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(999.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+                    ) {
+                        Text(
+                            text = if (deck.isEmpty()) "No cards available" else "Card ${currentIndex + 1} of ${deck.size}",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                        )
+                    }
+                }
+
+                DeckSelectionMenu(
+                    deckList = deckList,
+                    selectedDeckId = viewModel.selectedDeckId,
+                    onDeckSelected = { deckId ->
+                        viewModel.setSelectedDeck(deckId)
+                        currentIndex = 0
+                        isAnswerVisible = false
+                    },
+                    label = "Study Deck"
                 )
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(999.dp),
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
-                        ) {
-                            Text(
-                                text = "Card ${currentIndex + 1} of ${deck.size}",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                            )
-                        }
-                    }
-                    DeckSelectionMenu(
-                        deckList = deckList,
-                        selectedDeckId = viewModel.selectedDeckId,
-                        onDeckSelected = { deckId ->
-                            viewModel.setSelectedDeck(deckId)
-                            currentIndex = 0
-                            isAnswerVisible = false
-                        },
-                        label = "Study Deck"
+                if (deck.isEmpty()) {
+                    EmptyFlashcardState(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 8.dp),
+                        onDeckClick = onDeckClick
                     )
-
+                } else {
+                    val currentCard = deck[currentIndex]
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -308,6 +306,7 @@ fun FlashcardScreen(
                 }
             }
         }
+
     }
 }
 
