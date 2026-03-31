@@ -48,6 +48,13 @@ import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import kotlinx.coroutines.delay
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -70,7 +77,7 @@ fun HomeScreen(
         currentIndex = 0
         if (previewDeck.size > 1) {
             while (true) {
-                delay(2500)
+                delay(5000)
                 currentIndex = (currentIndex + 1) % previewDeck.size
             }
         }
@@ -171,18 +178,32 @@ fun HomeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .padding(top = 12.dp),
+                        .weight(1f),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (currentCard == null) {
-                        EmptyPreviewCard(
-                            onVocabularyClick = onVocabularyClick
-                        )
-                    } else {
-                        FlashPreviewDeck(card = currentCard)
+                    AnimatedContent(
+                        targetState = currentCard,
+                        transitionSpec = {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(durationMillis = 550)
+                            ) togetherWith slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> -fullWidth },
+                                animationSpec = tween(durationMillis = 550)
+                            ) using SizeTransform(clip = false)
+                        },
+                        label = "home_preview_animation"
+                    ) { previewCard ->
+                        if (previewCard == null) {
+                            EmptyPreviewCard(
+                                onVocabularyClick = onVocabularyClick
+                            )
+                        } else {
+                            FlashPreviewDeck(card = previewCard)
+                        }
                     }
                 }
+
             }
         }
     }
