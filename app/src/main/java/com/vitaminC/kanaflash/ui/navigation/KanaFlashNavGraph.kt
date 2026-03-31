@@ -23,11 +23,14 @@ import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.vitaminC.kanaflash.data.repository.VocabularyRepository
+import com.vitaminC.kanaflash.ui.screens.DecksScreen
 import com.vitaminC.kanaflash.ui.screens.FlashcardScreen
 import com.vitaminC.kanaflash.ui.screens.HomeScreen
 import com.vitaminC.kanaflash.ui.screens.QuizScreen
 import com.vitaminC.kanaflash.ui.screens.ResultScreen
 import com.vitaminC.kanaflash.ui.screens.VocabularyScreen
+import com.vitaminC.kanaflash.ui.viewmodel.DeckViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModelFactory
@@ -36,8 +39,9 @@ import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KanaFlashNavGraph(
+    repository: VocabularyRepository,
     homeFactory: HomeViewModelFactory,
-    vocabularyFactory: VocabularyViewModelFactory,
+    deckFactory: DeckViewModelFactory,
     flashcardFactory: FlashcardViewModelFactory,
     quizFactory: QuizViewModelFactory
 ) {
@@ -52,7 +56,7 @@ fun KanaFlashNavGraph(
             HomeScreen(
                 factory = homeFactory,
                 onVocabularyClick = {
-                    navController.navigate(KanaFlashRoutes.VOCABULARY) {
+                    navController.navigate(KanaFlashRoutes.DECKS) {
                         launchSingleTop = true
                     }
                 },
@@ -62,9 +66,38 @@ fun KanaFlashNavGraph(
             )
         }
 
-        composable(KanaFlashRoutes.VOCABULARY) {
+        composable(KanaFlashRoutes.DECKS) {
+            DecksScreen(
+                factory = deckFactory,
+                onHomeClick = {
+                    navController.navigate(KanaFlashRoutes.HOME) {
+                        popUpTo(KanaFlashRoutes.HOME) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onLearnClick = {
+                    showLearnSheet = true
+                },
+                onDeckClick = { deckId ->
+                    navController.navigate(KanaFlashRoutes.deckDetailRoute(deckId))
+                }
+            )
+        }
+
+        composable(
+            route = KanaFlashRoutes.DECK_DETAIL,
+            arguments = listOf(
+                navArgument("deckId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val deckId = backStackEntry.arguments?.getLong("deckId") ?: 1L
+            val vocabularyFactory = VocabularyViewModelFactory(repository, deckId)
+
             VocabularyScreen(
                 factory = vocabularyFactory,
+                onBackToDecks = {
+                    navController.popBackStack()
+                },
                 onHomeClick = {
                     navController.navigate(KanaFlashRoutes.HOME) {
                         popUpTo(KanaFlashRoutes.HOME) { inclusive = false }
@@ -81,7 +114,7 @@ fun KanaFlashNavGraph(
             FlashcardScreen(
                 factory = flashcardFactory,
                 onDeckClick = {
-                    navController.navigate(KanaFlashRoutes.VOCABULARY) {
+                    navController.navigate(KanaFlashRoutes.DECKS) {
                         launchSingleTop = true
                     }
                 },
@@ -101,7 +134,7 @@ fun KanaFlashNavGraph(
             QuizScreen(
                 factory = quizFactory,
                 onDeckClick = {
-                    navController.navigate(KanaFlashRoutes.VOCABULARY) {
+                    navController.navigate(KanaFlashRoutes.DECKS) {
                         launchSingleTop = true
                     }
                 },
@@ -136,7 +169,7 @@ fun KanaFlashNavGraph(
                 score = score,
                 total = total,
                 onDeckClick = {
-                    navController.navigate(KanaFlashRoutes.VOCABULARY) {
+                    navController.navigate(KanaFlashRoutes.DECKS) {
                         launchSingleTop = true
                     }
                 },

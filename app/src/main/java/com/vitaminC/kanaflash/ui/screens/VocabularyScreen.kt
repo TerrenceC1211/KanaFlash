@@ -45,19 +45,22 @@ import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
 import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 private val JapaneseTextRegex = Regex("^[ぁ-ゖァ-ヶ一-龯々ー\\s]+$")
-private val RomajiRegex = Regex("^[A-Za-z]+(?:[ '-][A-Za-z]+)*$")
+private val RomajiRegex = Regex("^[A-Za-zĀĒĪŌŪāēīōū]+(?:[ '-][A-Za-zĀĒĪŌŪāēīōū]+)*$")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VocabularyScreen(
     factory: VocabularyViewModelFactory,
+    onBackToDecks: () -> Unit,
     onHomeClick: () -> Unit,
     onLearnClick: () -> Unit
 ) {
     val viewModel: VocabularyViewModel = viewModel(factory = factory)
     val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
+    val deckTitle by viewModel.deckTitle.collectAsStateWithLifecycle()
 
     var showAddDialog by remember { mutableStateOf(false) }
     var editingEntry by remember { mutableStateOf<VocabularyEntry?>(null) }
@@ -67,7 +70,16 @@ fun VocabularyScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Vocabulary Deck") },
+                title = { Text(deckTitle) },
+                navigationIcon = {
+                    IconButton(onClick = onBackToDecks) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back to decks"
+                        )
+                    }
+                },
+
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
@@ -76,7 +88,7 @@ fun VocabularyScreen(
         bottomBar = {
             KanaFlashBottomBar(
                 activeSection = AppSection.DECK,
-                onDeckClick = { },
+                onDeckClick = onBackToDecks,
                 onHomeClick = onHomeClick,
                 onLearnClick = onLearnClick
             )
@@ -100,6 +112,7 @@ fun VocabularyScreen(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(innerPadding)
                     .padding(horizontal = 24.dp, vertical = 20.dp),
+                deckTitle = deckTitle,
                 onAddWordClick = { showAddDialog = true }
             )
         } else {
@@ -123,7 +136,7 @@ fun VocabularyScreen(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                     ) {
                         Text(
-                            text = "${vocabularyList.size} saved word" + if (vocabularyList.size == 1) "" else "s",
+                            text = "$deckTitle • ${vocabularyList.size} saved word" + if (vocabularyList.size == 1) "" else "s",
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
@@ -202,6 +215,7 @@ fun VocabularyScreen(
 @Composable
 private fun EmptyVocabularyState(
     modifier: Modifier = Modifier,
+    deckTitle: String,
     onAddWordClick: () -> Unit
 ) {
     Column(
@@ -209,12 +223,12 @@ private fun EmptyVocabularyState(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Start building your deck",
+            text = "Start building $deckTitle",
             style = MaterialTheme.typography.headlineMedium
         )
 
         Text(
-            text = "Add Japanese text, Romaji, and optional meaning so your saved words can appear across study mode, quiz mode, and home preview.",
+            text = "Add Japanese text, Romaji, and optional meaning so this deck becomes ready for flashcards, quizzes, and preview.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
@@ -321,15 +335,14 @@ private fun VocabularyEntryDialog(
     val trimmedHiragana = hiragana.trim()
     val trimmedMeaning = meaning.trim()
 
-    val isHiraganaFilled = trimmedHiragana.isNotBlank()
+    val isJapaneseFilled = trimmedHiragana.isNotBlank()
     val isRomajiFilled = trimmedRomaji.isNotBlank()
 
     val hiraganaError = when {
-        !isHiraganaFilled -> "Japanese text is required."
+        !isJapaneseFilled -> "Japanese text is required."
         !JapaneseTextRegex.matches(trimmedHiragana) -> "Use Japanese characters only."
         else -> null
     }
-
 
     val romajiError = when {
         !isRomajiFilled -> "Romaji is required."
@@ -368,7 +381,6 @@ private fun VocabularyEntryDialog(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-
 
                 OutlinedTextField(
                     value = romaji,

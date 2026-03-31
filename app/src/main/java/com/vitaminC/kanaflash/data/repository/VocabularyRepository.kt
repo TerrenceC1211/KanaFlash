@@ -46,6 +46,10 @@ class VocabularyRepository(
         return deckDao.observeAll()
     }
 
+    fun observeDeckById(id: Long): Flow<Deck?> {
+        return deckDao.observeById(id)
+    }
+
     suspend fun getAllDecks(): List<Deck> {
         return deckDao.getAll()
     }

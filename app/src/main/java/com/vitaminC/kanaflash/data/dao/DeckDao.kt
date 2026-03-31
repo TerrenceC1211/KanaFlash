@@ -20,4 +20,7 @@ interface DeckDao {
 
     @Query("SELECT * FROM decks WHERE id = :id")
     suspend fun getById(id: Long): Deck?
+
+    @Query("SELECT * FROM decks WHERE id = :id")
+    fun observeById(id: Long): Flow<Deck?>
 }
