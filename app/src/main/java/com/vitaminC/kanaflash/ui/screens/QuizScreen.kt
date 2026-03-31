@@ -43,6 +43,7 @@ import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
 import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModelFactory
+import com.vitaminC.kanaflash.ui.components.DeckSelectionMenu
 
 private data class QuizQuestion(
     val prompt: VocabularyEntry,
@@ -60,7 +61,8 @@ fun QuizScreen(
     onQuizFinished: (Int, Int) -> Unit
 ) {
     val viewModel: QuizViewModel = viewModel(factory = factory)
-    val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
+    val vocabularyList = viewModel.vocabularyList
+    val deckList by viewModel.deckList.collectAsStateWithLifecycle()
 
     var currentQuestionIndex by rememberSaveable { mutableIntStateOf(0) }
     var selectedAnswer by rememberSaveable { mutableStateOf<String?>(null) }
@@ -198,6 +200,15 @@ fun QuizScreen(
                                 )
                             }
                         }
+                        DeckSelectionMenu(
+                            deckList = deckList,
+                            selectedDeckId = viewModel.selectedDeckId,
+                            onDeckSelected = { deckId ->
+                                viewModel.setSelectedDeck(deckId)
+                            },
+                            label = "Quiz Deck"
+                        )
+
 
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth(),

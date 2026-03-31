@@ -38,6 +38,7 @@ import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
 import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.DeckViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.DeckViewModelFactory
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,13 +74,16 @@ fun DecksScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp),
+                containerColor = Color(0xFF5F7F5F).copy(alpha = 0.9f),
+                contentColor = Color(0xFFFFFBF5)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add deck"
                 )
             }
+
         }
     ) { innerPadding ->
         if (deckList.isEmpty()) {

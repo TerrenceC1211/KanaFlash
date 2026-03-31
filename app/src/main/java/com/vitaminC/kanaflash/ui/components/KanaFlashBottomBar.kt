@@ -24,10 +24,11 @@ fun KanaFlashBottomBar(
     onLearnClick: () -> Unit
 ) {
     Surface(
-        tonalElevation = 8.dp,
-        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f),
         modifier = Modifier.fillMaxWidth()
     ) {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()

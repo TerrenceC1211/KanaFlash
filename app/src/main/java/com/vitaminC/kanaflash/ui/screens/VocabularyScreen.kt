@@ -46,6 +46,7 @@ import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.graphics.Color
 
 private val JapaneseTextRegex = Regex("^[ぁ-ゖァ-ヶ一-龯々ー\\s]+$")
 private val RomajiRegex = Regex("^[A-Za-zĀĒĪŌŪāēīōū]+(?:[ '-][A-Za-zĀĒĪŌŪāēīōū]+)*$")
@@ -96,11 +97,13 @@ fun VocabularyScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp),
+                containerColor = Color(0xFF5F7F5F).copy(alpha = 0.9f),
+                contentColor = Color(0xFFFFFBF5)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add vocabulary"
+                    contentDescription = "Add deck"
                 )
             }
         }

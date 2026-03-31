@@ -49,6 +49,8 @@ import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import kotlinx.coroutines.delay
+import com.vitaminC.kanaflash.ui.components.DeckSelectionMenu
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +60,8 @@ fun HomeScreen(
     onLearnClick: () -> Unit
 ) {
     val viewModel: HomeViewModel = viewModel(factory = factory)
-    val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
+    val vocabularyList = viewModel.vocabularyList
+    val deckList by viewModel.deckList.collectAsStateWithLifecycle()
 
     var currentIndex by rememberSaveable { mutableIntStateOf(0) }
 
@@ -161,11 +164,13 @@ fun HomeScreen(
                         .fillMaxWidth(0.64f)
                 )
 
+
+
                 Text(
                     text = "Deck Preview",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 150.dp, bottom = 14.dp)
+                    modifier = Modifier.padding(top = 80.dp, bottom = 14.dp)
                 )
 
                 Box(
@@ -196,6 +201,17 @@ fun HomeScreen(
                         }
                     }
                 }
+
+                DeckSelectionMenu(
+                    deckList = deckList,
+                    selectedDeckId = viewModel.selectedDeckId,
+                    onDeckSelected = { deckId ->
+                        viewModel.setSelectedDeck(deckId)
+                    },
+                    label = "Preview Deck"
+
+                )
+
             }
         }
     }

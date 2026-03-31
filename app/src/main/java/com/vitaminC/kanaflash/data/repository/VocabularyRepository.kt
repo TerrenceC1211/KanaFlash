@@ -61,4 +61,12 @@ class VocabularyRepository(
     suspend fun insertDeck(deck: Deck): Long {
         return deckDao.insert(deck)
     }
+
+    suspend fun getVocabularyForSelection(deckId: Long?): List<VocabularyEntry> {
+        return if (deckId == null) {
+            vocabularyDao.getAll()
+        } else {
+            vocabularyDao.getByDeck(deckId)
+        }
+    }
 }

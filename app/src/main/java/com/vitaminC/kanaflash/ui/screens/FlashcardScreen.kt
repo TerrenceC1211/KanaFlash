@@ -43,6 +43,7 @@ import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
 import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModelFactory
+import com.vitaminC.kanaflash.ui.components.DeckSelectionMenu
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +54,8 @@ fun FlashcardScreen(
     onLearnClick: () -> Unit
 ) {
     val viewModel: FlashcardViewModel = viewModel(factory = factory)
-    val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
+    val vocabularyList = viewModel.vocabularyList
+    val deckList by viewModel.deckList.collectAsStateWithLifecycle()
 
     var isShuffled by rememberSaveable { mutableStateOf(false) }
     var currentIndex by rememberSaveable { mutableIntStateOf(0) }
@@ -146,6 +148,17 @@ fun FlashcardScreen(
                             )
                         }
                     }
+                    DeckSelectionMenu(
+                        deckList = deckList,
+                        selectedDeckId = viewModel.selectedDeckId,
+                        onDeckSelected = { deckId ->
+                            viewModel.setSelectedDeck(deckId)
+                            currentIndex = 0
+                            isAnswerVisible = false
+                        },
+                        label = "Study Deck"
+                    )
+
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
