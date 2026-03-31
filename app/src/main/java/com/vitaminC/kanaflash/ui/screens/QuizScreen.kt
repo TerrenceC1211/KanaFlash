@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,7 +22,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.Card
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -41,8 +43,6 @@ import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
 import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModelFactory
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 
 private data class QuizQuestion(
     val prompt: VocabularyEntry,
@@ -77,11 +77,12 @@ fun QuizScreen(
                 val wrongAnswers = vocabularyList
                     .filter { it.id != correctEntry.id }
                     .map { it.hiragana }
+                    .filter { it.isNotBlank() }
                     .distinct()
                     .shuffled()
                     .take(3)
 
-                if (wrongAnswers.size == 3) {
+                if (wrongAnswers.size == 3 && correctEntry.hiragana.isNotBlank()) {
                     val options = (wrongAnswers + correctEntry.hiragana).shuffled()
                     questions.add(
                         QuizQuestion(
@@ -159,6 +160,7 @@ fun QuizScreen(
                 val currentQuestion = questions[currentQuestionIndex]
                 val correctAnswer = currentQuestion.correctAnswer
                 val isLastQuestion = currentQuestionIndex == questions.lastIndex
+                val scrollState = rememberScrollState()
 
                 Box(
                     modifier = Modifier
@@ -173,8 +175,6 @@ fun QuizScreen(
                             .background(backgroundBrush)
                     )
 
-                    val scrollState = rememberScrollState()
-
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -182,8 +182,7 @@ fun QuizScreen(
                             .verticalScroll(scrollState),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-
-                    Row(
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
@@ -198,13 +197,11 @@ fun QuizScreen(
                                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                                 )
                             }
-
-
                         }
 
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(30.dp),
+                            shape = RoundedCornerShape(34.dp),
                             colors = CardDefaults.elevatedCardColors(
                                 containerColor = MaterialTheme.colorScheme.surface
                             ),
@@ -216,6 +213,18 @@ fun QuizScreen(
                                     .padding(horizontal = 24.dp, vertical = 24.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
+                                Surface(
+                                    shape = RoundedCornerShape(999.dp),
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                                ) {
+                                    Text(
+                                        text = "Prompt",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                    )
+                                }
+
                                 Text(
                                     text = "Select the correct Japanese text for:",
                                     style = MaterialTheme.typography.bodyLarge,
@@ -232,8 +241,7 @@ fun QuizScreen(
                         Column(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-
-                        currentQuestion.options.forEach { option ->
+                            currentQuestion.options.forEach { option ->
                                 val isSelected = selectedAnswer == option
                                 val isCorrect = option == correctAnswer
 
@@ -265,7 +273,6 @@ fun QuizScreen(
                                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 22.dp)
                                     )
                                 }
-
                             }
                         }
 
@@ -309,24 +316,24 @@ fun QuizScreen(
                                     )
                                 }
                             }
+                        }
 
-                            if (isLastQuestion) {
-                                Button(
-                                    onClick = { onQuizFinished(score, questions.size) },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text("Finish Quiz")
-                                }
-                            } else {
-                                OutlinedButton(
-                                    onClick = {
-                                        currentQuestionIndex += 1
-                                        selectedAnswer = null
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text("Next Question")
-                                }
+                        if (isLastQuestion) {
+                            Button(
+                                onClick = { onQuizFinished(score, questions.size) },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Finish Quiz")
+                            }
+                        } else {
+                            OutlinedButton(
+                                onClick = {
+                                    currentQuestionIndex += 1
+                                    selectedAnswer = null
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Next Question")
                             }
                         }
                     }
@@ -335,6 +342,7 @@ fun QuizScreen(
         }
     }
 }
+
 
 @Composable
 private fun QuizMessageState(

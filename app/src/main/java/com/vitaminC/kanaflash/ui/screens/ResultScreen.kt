@@ -124,9 +124,7 @@ fun ResultScreen(
                     )
                 }
 
-                Box(
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(contentAlignment = Alignment.Center) {
                     Surface(
                         modifier = Modifier.size(156.dp),
                         shape = CircleShape,
@@ -160,7 +158,7 @@ fun ResultScreen(
 
                 ElevatedCard(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(30.dp),
+                    shape = RoundedCornerShape(34.dp),
                     colors = CardDefaults.elevatedCardColors(
                         containerColor = MaterialTheme.colorScheme.surface
                     ),
@@ -225,5 +223,3 @@ fun ResultScreen(
         }
     }
 }
-
-

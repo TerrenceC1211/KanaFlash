@@ -145,8 +145,6 @@ fun FlashcardScreen(
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                             )
                         }
-
-
                     }
 
                     Row(
@@ -161,7 +159,6 @@ fun FlashcardScreen(
                         ) {
                             Text(if (isShuffled) "Shuffle On" else "Shuffle Off")
                         }
-
                     }
 
                     Box(

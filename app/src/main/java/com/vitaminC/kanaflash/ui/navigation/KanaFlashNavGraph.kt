@@ -52,7 +52,9 @@ fun KanaFlashNavGraph(
             HomeScreen(
                 factory = homeFactory,
                 onVocabularyClick = {
-                    navController.navigate(KanaFlashRoutes.VOCABULARY)
+                    navController.navigate(KanaFlashRoutes.VOCABULARY) {
+                        launchSingleTop = true
+                    }
                 },
                 onLearnClick = {
                     showLearnSheet = true
@@ -79,7 +81,9 @@ fun KanaFlashNavGraph(
             FlashcardScreen(
                 factory = flashcardFactory,
                 onDeckClick = {
-                    navController.navigate(KanaFlashRoutes.VOCABULARY)
+                    navController.navigate(KanaFlashRoutes.VOCABULARY) {
+                        launchSingleTop = true
+                    }
                 },
                 onHomeClick = {
                     navController.navigate(KanaFlashRoutes.HOME) {
@@ -97,7 +101,9 @@ fun KanaFlashNavGraph(
             QuizScreen(
                 factory = quizFactory,
                 onDeckClick = {
-                    navController.navigate(KanaFlashRoutes.VOCABULARY)
+                    navController.navigate(KanaFlashRoutes.VOCABULARY) {
+                        launchSingleTop = true
+                    }
                 },
                 onHomeClick = {
                     navController.navigate(KanaFlashRoutes.HOME) {
@@ -109,7 +115,9 @@ fun KanaFlashNavGraph(
                     showLearnSheet = true
                 },
                 onQuizFinished = { score, total ->
-                    navController.navigate(KanaFlashRoutes.resultRoute(score, total))
+                    navController.navigate(KanaFlashRoutes.resultRoute(score, total)) {
+                        launchSingleTop = true
+                    }
                 }
             )
         }
@@ -128,7 +136,9 @@ fun KanaFlashNavGraph(
                 score = score,
                 total = total,
                 onDeckClick = {
-                    navController.navigate(KanaFlashRoutes.VOCABULARY)
+                    navController.navigate(KanaFlashRoutes.VOCABULARY) {
+                        launchSingleTop = true
+                    }
                 },
                 onHomeClick = {
                     navController.navigate(KanaFlashRoutes.HOME) {
@@ -174,7 +184,9 @@ fun KanaFlashNavGraph(
                 Button(
                     onClick = {
                         showLearnSheet = false
-                        navController.navigate(KanaFlashRoutes.FLASHCARDS)
+                        navController.navigate(KanaFlashRoutes.FLASHCARDS) {
+                            launchSingleTop = true
+                        }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -184,7 +196,9 @@ fun KanaFlashNavGraph(
                 TextButton(
                     onClick = {
                         showLearnSheet = false
-                        navController.navigate(KanaFlashRoutes.QUIZ)
+                        navController.navigate(KanaFlashRoutes.QUIZ) {
+                            launchSingleTop = true
+                        }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
