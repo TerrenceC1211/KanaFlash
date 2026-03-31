@@ -19,7 +19,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val database = AppDatabaseProvider.getDatabase(this)
-        val repository = VocabularyRepository(database.vocabularyDao())
+        val repository = VocabularyRepository(
+            database.vocabularyDao(),
+            database.deckDao()
+        )
 
         val homeFactory = HomeViewModelFactory(repository)
         val vocabularyFactory = VocabularyViewModelFactory(repository)
@@ -38,4 +41,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
