@@ -30,11 +30,13 @@ import com.vitaminC.kanaflash.ui.screens.HomeScreen
 import com.vitaminC.kanaflash.ui.screens.QuizScreen
 import com.vitaminC.kanaflash.ui.screens.ResultScreen
 import com.vitaminC.kanaflash.ui.screens.VocabularyScreen
+import com.vitaminC.kanaflash.ui.screens.WritePracticeScreen
 import com.vitaminC.kanaflash.ui.viewmodel.DeckViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
+import com.vitaminC.kanaflash.ui.viewmodel.WritePracticeViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +45,8 @@ fun KanaFlashNavGraph(
     homeFactory: HomeViewModelFactory,
     deckFactory: DeckViewModelFactory,
     flashcardFactory: FlashcardViewModelFactory,
-    quizFactory: QuizViewModelFactory
+    quizFactory: QuizViewModelFactory,
+    writeFactory: WritePracticeViewModelFactory
 ) {
     val navController = rememberNavController()
     var showLearnSheet by rememberSaveable { mutableStateOf(false) }
@@ -155,6 +158,26 @@ fun KanaFlashNavGraph(
             )
         }
 
+        composable(KanaFlashRoutes.WRITE) {
+            WritePracticeScreen(
+                factory = writeFactory,
+                onDeckClick = {
+                    navController.navigate(KanaFlashRoutes.DECKS) {
+                        launchSingleTop = true
+                    }
+                },
+                onHomeClick = {
+                    navController.navigate(KanaFlashRoutes.HOME) {
+                        popUpTo(KanaFlashRoutes.HOME) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onLearnClick = {
+                    showLearnSheet = true
+                }
+            )
+        }
+
         composable(
             route = KanaFlashRoutes.RESULT_WITH_ARGS,
             arguments = listOf(
@@ -236,6 +259,18 @@ fun KanaFlashNavGraph(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Quiz")
+                }
+
+                TextButton(
+                    onClick = {
+                        showLearnSheet = false
+                        navController.navigate(KanaFlashRoutes.WRITE) {
+                            launchSingleTop = true
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Write")
                 }
             }
         }

@@ -12,6 +12,7 @@ import com.vitaminC.kanaflash.ui.viewmodel.DeckViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModelFactory
+import com.vitaminC.kanaflash.ui.viewmodel.WritePracticeViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +29,7 @@ class MainActivity : ComponentActivity() {
         val deckFactory = DeckViewModelFactory(repository)
         val flashcardFactory = FlashcardViewModelFactory(repository)
         val quizFactory = QuizViewModelFactory(repository)
+        val writeFactory = WritePracticeViewModelFactory(repository)
 
         setContent {
             KanaFlashTheme {
@@ -36,7 +38,8 @@ class MainActivity : ComponentActivity() {
                     homeFactory = homeFactory,
                     deckFactory = deckFactory,
                     flashcardFactory = flashcardFactory,
-                    quizFactory = quizFactory
+                    quizFactory = quizFactory,
+                    writeFactory = writeFactory
                 )
             }
         }

@@ -6,6 +6,7 @@ object KanaFlashRoutes {
     const val DECK_DETAIL = "decks/{deckId}"
     const val FLASHCARDS = "flashcards"
     const val QUIZ = "quiz"
+    const val WRITE = "write"
     const val RESULT = "result"
     const val RESULT_WITH_ARGS = "result/{score}/{total}"
 
