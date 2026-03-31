@@ -122,7 +122,7 @@ fun HomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 50.dp),
+                    .padding(top = 25.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
                 Surface(
@@ -158,21 +158,21 @@ fun HomeScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(top = 8.dp)
-                        .fillMaxWidth(0.68f)
+                        .fillMaxWidth(0.64f)
                 )
 
                 Text(
                     text = "Deck Preview",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 92.dp, bottom = 14.dp)
+                    modifier = Modifier.padding(top = 150.dp, bottom = 14.dp)
                 )
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .padding(top = 48.dp),
+                        .padding(top = 12.dp),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     if (currentCard == null) {
