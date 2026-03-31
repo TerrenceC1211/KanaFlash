@@ -10,8 +10,8 @@ val Typography = Typography(
     headlineLarge = TextStyle(
         fontFamily = FontFamily.Serif,
         fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
-        lineHeight = 38.sp
+        fontSize = 40.sp,
+        lineHeight = 46.sp
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.Serif,

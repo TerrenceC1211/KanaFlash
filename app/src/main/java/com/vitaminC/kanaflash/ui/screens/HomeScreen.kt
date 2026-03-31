@@ -4,13 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
@@ -35,15 +33,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.vitaminC.kanaflash.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitaminC.kanaflash.data.entity.VocabularyEntry
+import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
+import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import kotlinx.coroutines.delay
 
-import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
-import com.vitaminC.kanaflash.ui.navigation.AppSection
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,28 +89,43 @@ fun HomeScreen(
                 onLearnClick = { showLearnSheet = true }
             )
         }
-
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .padding(horizontal = 24.dp, vertical = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "KanaFlash",
-                style = MaterialTheme.typography.headlineLarge,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 12.dp)
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "KanaFlash logo",
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .size(width = 190.dp, height = 140.dp),
+                contentScale = ContentScale.Fit
             )
+            Text(
+                text = "Learn kana through quick review and active recall.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .fillMaxWidth(0.82f)
+            )
+
+
+
+
+
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .weight(1f)
+                    .padding(top = 36.dp, bottom = 20.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (currentCard == null) {
@@ -129,7 +148,7 @@ fun HomeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Text(
@@ -138,7 +157,7 @@ fun HomeScreen(
                 )
 
                 Text(
-                    text = "Choose how you want to study your saved vocabulary.",
+                    text = "Choose a study mode for the vocabulary currently saved in your deck.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -178,31 +197,31 @@ private fun FlashPreviewDeck(
         ElevatedCard(
             modifier = Modifier
                 .fillMaxWidth(0.72f)
-                .offset(x = (-110).dp, y = 8.dp),
+                .offset(x = (-105).dp, y = 8.dp),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.36f)
             ),
             shape = RoundedCornerShape(28.dp),
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
         ) {
-            Box(modifier = Modifier.padding(vertical = 54.dp))
+            Box(modifier = Modifier.padding(vertical = 60.dp))
         }
 
         ElevatedCard(
             modifier = Modifier
                 .fillMaxWidth(0.72f)
-                .offset(x = 110.dp, y = 8.dp),
+                .offset(x = 105.dp, y = 8.dp),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.36f)
             ),
             shape = RoundedCornerShape(28.dp),
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
         ) {
-            Box(modifier = Modifier.padding(vertical = 54.dp))
+            Box(modifier = Modifier.padding(vertical = 60.dp))
         }
 
         ElevatedCard(
-            modifier = Modifier.fillMaxWidth(0.82f),
+            modifier = Modifier.fillMaxWidth(0.84f),
             colors = CardDefaults.elevatedCardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
@@ -243,7 +262,7 @@ private fun FlashPreviewDeck(
 @Composable
 private fun EmptyPreviewCard() {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(0.82f),
+        modifier = Modifier.fillMaxWidth(0.84f),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -264,7 +283,7 @@ private fun EmptyPreviewCard() {
             )
 
             Text(
-                text = "Add words to your deck and they will appear here automatically.",
+                text = "Add words in your deck to show a rotating preview here.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -272,4 +291,3 @@ private fun EmptyPreviewCard() {
         }
     }
 }
-
