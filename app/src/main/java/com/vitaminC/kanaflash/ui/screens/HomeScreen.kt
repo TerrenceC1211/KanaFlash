@@ -1,5 +1,11 @@
 package com.vitaminC.kanaflash.ui.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,17 +23,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -48,25 +50,16 @@ import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import kotlinx.coroutines.delay
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     factory: HomeViewModelFactory,
     onVocabularyClick: () -> Unit,
-    onFlashcardsClick: () -> Unit,
-    onQuizClick: () -> Unit
+    onLearnClick: () -> Unit
 ) {
     val viewModel: HomeViewModel = viewModel(factory = factory)
     val vocabularyList by viewModel.vocabularyList.collectAsStateWithLifecycle()
 
-    var showLearnSheet by rememberSaveable { mutableStateOf(false) }
     var currentIndex by rememberSaveable { mutableIntStateOf(0) }
 
     val previewDeck = remember(vocabularyList) {
@@ -109,7 +102,7 @@ fun HomeScreen(
                 activeSection = AppSection.HOME,
                 onDeckClick = onVocabularyClick,
                 onHomeClick = { },
-                onLearnClick = { showLearnSheet = true }
+                onLearnClick = onLearnClick
             )
         }
     ) { innerPadding ->
@@ -202,55 +195,6 @@ fun HomeScreen(
                             FlashPreviewDeck(card = previewCard)
                         }
                     }
-                }
-
-            }
-        }
-    }
-
-    if (showLearnSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-        ModalBottomSheet(
-            onDismissRequest = { showLearnSheet = false },
-            sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.surface
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Text(
-                    text = "Learn",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-
-                Text(
-                    text = "Choose a study mode for the vocabulary currently saved in your deck.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Button(
-                    onClick = {
-                        showLearnSheet = false
-                        onFlashcardsClick()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Flashcards")
-                }
-
-                TextButton(
-                    onClick = {
-                        showLearnSheet = false
-                        onQuizClick()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Quiz")
                 }
             }
         }
