@@ -202,7 +202,7 @@ fun QuizScreen(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Text(
-                                text = "Select the correct Hiragana for:",
+                                text = "Select the correct Japanese text for:",
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

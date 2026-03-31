@@ -166,10 +166,11 @@ fun FlashcardScreen(
 
 
                         Text(
-                            text = "Hiragana",
+                            text = "Japanese",
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+
 
                         Text(
                             text = currentCard.hiragana,

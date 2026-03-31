@@ -3,6 +3,7 @@ package com.vitaminC.kanaflash.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,6 +45,9 @@ import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
 import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
+
+private val JapaneseTextRegex = Regex("^[ぁ-ゖァ-ヶ一-龯々ー\\s]+$")
+private val RomajiRegex = Regex("^[A-Za-z]+(?:[ '-][A-Za-z]+)*$")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,7 +108,7 @@ fun VocabularyScreen(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
                     .padding(innerPadding),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                contentPadding = PaddingValues(
                     start = 20.dp,
                     end = 20.dp,
                     top = 12.dp,
@@ -141,14 +145,14 @@ fun VocabularyScreen(
     if (showAddDialog) {
         VocabularyEntryDialog(
             title = "Add Vocabulary",
-            confirmLabel = "Save",
+            confirmLabel = "Save & Add Next",
             initialRomaji = "",
             initialHiragana = "",
             initialMeaning = "",
+            keepOpenAfterConfirm = true,
             onDismiss = { showAddDialog = false },
             onConfirm = { romaji, hiragana, meaning ->
                 viewModel.addEntry(romaji, hiragana, meaning)
-                showAddDialog = false
             }
         )
     }
@@ -160,6 +164,7 @@ fun VocabularyScreen(
             initialRomaji = entry.romaji,
             initialHiragana = entry.hiragana,
             initialMeaning = entry.meaning.orEmpty(),
+            keepOpenAfterConfirm = false,
             onDismiss = { editingEntry = null },
             onConfirm = { romaji, hiragana, meaning ->
                 viewModel.updateEntry(entry.id, romaji, hiragana, meaning)
@@ -209,7 +214,7 @@ private fun EmptyVocabularyState(
         )
 
         Text(
-            text = "Add Hiragana, Romaji, and optional meaning so your saved words can appear across study mode, quiz mode, and home preview.",
+            text = "Add Japanese text, Romaji, and optional meaning so your saved words can appear across study mode, quiz mode, and home preview.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
@@ -304,14 +309,35 @@ private fun VocabularyEntryDialog(
     initialRomaji: String,
     initialHiragana: String,
     initialMeaning: String,
+    keepOpenAfterConfirm: Boolean,
     onDismiss: () -> Unit,
     onConfirm: (String, String, String) -> Unit
 ) {
-    var romaji by remember { mutableStateOf(initialRomaji) }
-    var hiragana by remember { mutableStateOf(initialHiragana) }
-    var meaning by remember { mutableStateOf(initialMeaning) }
+    var romaji by remember(title, initialRomaji) { mutableStateOf(initialRomaji) }
+    var hiragana by remember(title, initialHiragana) { mutableStateOf(initialHiragana) }
+    var meaning by remember(title, initialMeaning) { mutableStateOf(initialMeaning) }
 
-    val isValid = romaji.trim().isNotBlank() && hiragana.trim().isNotBlank()
+    val trimmedRomaji = romaji.trim()
+    val trimmedHiragana = hiragana.trim()
+    val trimmedMeaning = meaning.trim()
+
+    val isHiraganaFilled = trimmedHiragana.isNotBlank()
+    val isRomajiFilled = trimmedRomaji.isNotBlank()
+
+    val hiraganaError = when {
+        !isHiraganaFilled -> "Japanese text is required."
+        !JapaneseTextRegex.matches(trimmedHiragana) -> "Use Japanese characters only."
+        else -> null
+    }
+
+
+    val romajiError = when {
+        !isRomajiFilled -> "Romaji is required."
+        !RomajiRegex.matches(trimmedRomaji) -> "Use English letters only. Spaces, apostrophes, and hyphens are allowed."
+        else -> null
+    }
+
+    val isValid = hiraganaError == null && romajiError == null
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -319,7 +345,11 @@ private fun VocabularyEntryDialog(
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(title)
                 Text(
-                    text = "Hiragana appears first throughout the app, so add it in the order learners will see it.",
+                    text = if (keepOpenAfterConfirm) {
+                        "Save adds the current word and clears the form so you can enter the next one."
+                    } else {
+                        "Update the saved word details below."
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -330,15 +360,24 @@ private fun VocabularyEntryDialog(
                 OutlinedTextField(
                     value = hiragana,
                     onValueChange = { hiragana = it },
-                    label = { Text("Hiragana") },
+                    label = { Text("Japanese") },
+                    supportingText = {
+                        Text(hiraganaError ?: "Example: こんにちは / コンニチハ / 今日")
+                    },
+                    isError = hiraganaError != null,
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
+
 
                 OutlinedTextField(
                     value = romaji,
                     onValueChange = { romaji = it },
                     label = { Text("Romaji") },
+                    supportingText = {
+                        Text(romajiError ?: "Example: konnichiwa")
+                    },
+                    isError = romajiError != null,
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -350,20 +389,21 @@ private fun VocabularyEntryDialog(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-
-                if (!isValid) {
-                    Text(
-                        text = "Hiragana and Romaji are required.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        textAlign = TextAlign.Start
-                    )
-                }
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(romaji, hiragana, meaning) },
+                onClick = {
+                    if (!isValid) return@TextButton
+
+                    onConfirm(trimmedRomaji, trimmedHiragana, trimmedMeaning)
+
+                    if (keepOpenAfterConfirm) {
+                        romaji = ""
+                        hiragana = ""
+                        meaning = ""
+                    }
+                },
                 enabled = isValid
             ) {
                 Text(confirmLabel)
@@ -371,7 +411,7 @@ private fun VocabularyEntryDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(if (keepOpenAfterConfirm) "Done" else "Cancel")
             }
         }
     )
