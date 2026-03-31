@@ -152,26 +152,27 @@ fun HomeScreen(
                 )
 
                 Text(
-                    text = "Build your deck, review kana, and sharpen recall with quick study sessions.",
+                    text = "Build your deck and learn with quick study sessions.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(top = 8.dp)
-                        .fillMaxWidth(0.88f)
+                        .fillMaxWidth(0.68f)
                 )
 
                 Text(
                     text = "Deck Preview",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 28.dp, bottom = 14.dp)
+                    modifier = Modifier.padding(top = 92.dp, bottom = 14.dp)
                 )
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
+                        .weight(1f)
+                        .padding(top = 48.dp),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     if (currentCard == null) {
