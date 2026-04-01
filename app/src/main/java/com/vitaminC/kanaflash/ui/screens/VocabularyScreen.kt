@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -36,7 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,8 +46,11 @@ import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
 import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
+
+private const val MAX_JAPANESE_LENGTH = 20
+private const val MAX_ROMAJI_LENGTH = 50
+private const val MAX_MEANING_LENGTH = 50
 
 private val JapaneseTextRegex = Regex("^[ぁ-ゖァ-ヶ一-龯々ー\\s]+$")
 private val RomajiRegex = Regex("^[A-Za-zĀĒĪŌŪāēīōū]+(?:[ '-][A-Za-zĀĒĪŌŪāēīōū]+)*$")
@@ -80,7 +84,6 @@ fun VocabularyScreen(
                         )
                     }
                 },
-
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
@@ -103,7 +106,7 @@ fun VocabularyScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add deck"
+                    contentDescription = "Add vocabulary"
                 )
             }
         }
@@ -240,9 +243,9 @@ private fun EmptyVocabularyState(
         FloatingActionButton(
             onClick = onAddWordClick,
             containerColor = Color(0xFF5F7F5F).copy(alpha = 0.9f),
-            contentColor = Color(0xFFFFFBF5)) {
+            contentColor = Color(0xFFFFFBF5)
+        ) {
             Icon(
-
                 imageVector = Icons.Default.Add,
                 contentDescription = "Add first vocabulary"
             )
@@ -277,19 +280,28 @@ private fun VocabularyItemCard(
                 Text(
                     text = entry.hiragana,
                     style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
+
 
                 Text(
                     text = entry.romaji,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+
 
                 Text(
                     text = entry.meaning ?: "No meaning added",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
+
             }
 
             Surface(
@@ -353,7 +365,7 @@ private fun VocabularyEntryDialog(
 
     val romajiError = when {
         !isRomajiFilled -> "Romaji is required."
-        !RomajiRegex.matches(trimmedRomaji) -> "Use English letters only. Spaces, apostrophes, and hyphens are allowed."
+        !RomajiRegex.matches(trimmedRomaji) -> "Use Romaji letters only. Macrons, spaces, apostrophes, and hyphens are allowed."
         else -> null
     }
 
@@ -379,10 +391,13 @@ private fun VocabularyEntryDialog(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = hiragana,
-                    onValueChange = { hiragana = it },
+                    onValueChange = { hiragana = it.take(MAX_JAPANESE_LENGTH) },
                     label = { Text("Japanese") },
                     supportingText = {
-                        Text(hiraganaError ?: "Example: こんにちは / コンニチハ / 今日")
+                        Text(
+                            text = hiraganaError
+                                ?: "Example: こんにちは / コンニチハ / 今日   ${hiragana.length} / $MAX_JAPANESE_LENGTH"
+                        )
                     },
                     isError = hiraganaError != null,
                     modifier = Modifier.fillMaxWidth(),
@@ -391,10 +406,13 @@ private fun VocabularyEntryDialog(
 
                 OutlinedTextField(
                     value = romaji,
-                    onValueChange = { romaji = it },
+                    onValueChange = { romaji = it.take(MAX_ROMAJI_LENGTH) },
                     label = { Text("Romaji") },
                     supportingText = {
-                        Text(romajiError ?: "Example: konnichiwa")
+                        Text(
+                            text = romajiError
+                                ?: "Example: konnichiwa / gakkō   ${romaji.length} / $MAX_ROMAJI_LENGTH"
+                        )
                     },
                     isError = romajiError != null,
                     modifier = Modifier.fillMaxWidth(),
@@ -403,8 +421,11 @@ private fun VocabularyEntryDialog(
 
                 OutlinedTextField(
                     value = meaning,
-                    onValueChange = { meaning = it },
+                    onValueChange = { meaning = it.take(MAX_MEANING_LENGTH) },
                     label = { Text("Meaning (Optional)") },
+                    supportingText = {
+                        Text("${meaning.length} / $MAX_MEANING_LENGTH")
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )

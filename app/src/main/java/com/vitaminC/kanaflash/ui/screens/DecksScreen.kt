@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -55,6 +56,7 @@ fun DecksScreen(
 ) {
     val viewModel: DeckViewModel = viewModel(factory = factory)
     val deckList by viewModel.deckList.collectAsStateWithLifecycle()
+    val deckWordCounts by viewModel.deckWordCounts.collectAsStateWithLifecycle()
 
     var showAddDialog by remember { mutableStateOf(false) }
     var deckPendingRename by remember { mutableStateOf<Deck?>(null) }
@@ -141,6 +143,7 @@ fun DecksScreen(
                 items(deckList, key = { it.id }) { deck ->
                     DeckItemCard(
                         deck = deck,
+                        wordCount = deckWordCounts[deck.id] ?: 0,
                         canDelete = deckList.size > 1,
                         onClick = { onDeckClick(deck.id) },
                         onEditClick = { deckPendingRename = deck },
@@ -180,11 +183,17 @@ fun DecksScreen(
     }
 
     deckPendingDelete?.let { deck ->
+        val wordCount = deckWordCounts[deck.id] ?: 0
+
         AlertDialog(
             onDismissRequest = { deckPendingDelete = null },
             title = { Text("Delete Deck") },
             text = {
-                Text("Deleting \"${deck.title}\" will also delete all vocabulary inside it. This cannot be undone.")
+                Text(
+                    "Deleting \"${deck.title}\" will also delete $wordCount word" +
+                            if (wordCount == 1) "" else "s" +
+                                    ". This cannot be undone."
+                )
             },
             confirmButton = {
                 TextButton(
@@ -212,6 +221,7 @@ fun DecksScreen(
 @Composable
 private fun DeckItemCard(
     deck: Deck,
+    wordCount: Int,
     canDelete: Boolean,
     onClick: () -> Unit,
     onEditClick: () -> Unit,
@@ -239,12 +249,20 @@ private fun DeckItemCard(
                 Text(
                     text = deck.title,
                     style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = "$wordCount word" + if (wordCount == 1) "" else "s",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Text(
                     text = "Tap to manage words",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

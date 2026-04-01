@@ -50,6 +50,7 @@ import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import kotlinx.coroutines.delay
 import com.vitaminC.kanaflash.ui.components.DeckSelectionMenu
+import androidx.compose.ui.text.style.TextOverflow
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -270,13 +271,17 @@ private fun FlashPreviewDeck(
                     text = card.hiragana,
                     style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Text(
                     text = card.romaji,
                     style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Text(
@@ -284,12 +289,15 @@ private fun FlashPreviewDeck(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = 4.dp),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
     }
 }
+
 
 @Composable
 private fun EmptyPreviewCard(

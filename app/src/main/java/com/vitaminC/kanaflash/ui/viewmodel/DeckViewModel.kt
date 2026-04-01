@@ -7,6 +7,7 @@ import com.vitaminC.kanaflash.data.entity.Deck
 import com.vitaminC.kanaflash.data.repository.VocabularyRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -19,6 +20,20 @@ class DeckViewModel(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
+        )
+
+    val deckWordCounts: StateFlow<Map<Long, Int>> =
+        combine(
+            repository.observeAllDecks(),
+            repository.observeAll()
+        ) { decks, vocabulary ->
+            decks.associate { deck ->
+                deck.id to vocabulary.count { it.deckId == deck.id }
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyMap()
         )
 
     fun addDeck(title: String) {
