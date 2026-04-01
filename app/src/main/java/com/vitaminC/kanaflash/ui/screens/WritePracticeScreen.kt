@@ -15,20 +15,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.Redo
+
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -61,6 +56,9 @@ import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
 import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.WritePracticeViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.WritePracticeViewModelFactory
+import com.vitaminC.kanaflash.ui.components.StudyIconButton
+import com.vitaminC.kanaflash.ui.components.StudyOutlineButton
+import com.vitaminC.kanaflash.ui.components.StudyPrimaryButton
 
 private data class DrawStroke(
     val path: Path
@@ -205,7 +203,7 @@ fun WritePracticeScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(
+                    StudyOutlineButton(
                         onClick = { moveToPreviousWord() },
                         enabled = currentIndex > 0,
                         modifier = Modifier.weight(1.1f)
@@ -213,34 +211,32 @@ fun WritePracticeScreen(
                         Text("Back")
                     }
 
-                    ActionIconButton(
+                    StudyIconButton(
                         onClick = { undoLastStroke() },
                         enabled = strokes.isNotEmpty(),
-                        icon = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Undo,
-                                contentDescription = "Undo stroke"
-                            )
-                        },
                         modifier = Modifier.weight(0.9f)
-                    )
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Undo,
+                            contentDescription = "Undo stroke"
+                        )
+                    }
 
-                    ActionIconButton(
+                    StudyIconButton(
                         onClick = {
                             isAnswerVisible = false
                             clearCanvas()
                         },
                         enabled = strokes.isNotEmpty() || currentPath != null || isAnswerVisible,
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Filled.CleaningServices,
-                                contentDescription = "Clear writing"
-                            )
-                        },
                         modifier = Modifier.weight(0.9f)
-                    )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.CleaningServices,
+                            contentDescription = "Clear writing"
+                        )
+                    }
 
-                    Button(
+                    StudyPrimaryButton(
                         onClick = { moveToNextWord() },
                         modifier = Modifier.weight(1.1f)
                     ) {
@@ -252,27 +248,7 @@ fun WritePracticeScreen(
     }
 }
 
-@Composable
-private fun ActionIconButton(
-    onClick: () -> Unit,
-    enabled: Boolean,
-    icon: @Composable () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    FilledIconButton(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier.height(48.dp),
-        colors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.primary,
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-        )
-    ) {
-        icon()
-    }
-}
+
 
 @Composable
 private fun WritePromptCard(
@@ -529,8 +505,9 @@ private fun EmptyWriteState(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Button(onClick = onDeckClick) {
+        StudyPrimaryButton(onClick = onDeckClick) {
             Text("Go to Deck")
         }
+
     }
 }

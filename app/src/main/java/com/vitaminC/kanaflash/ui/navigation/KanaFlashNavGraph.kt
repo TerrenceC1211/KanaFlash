@@ -37,6 +37,8 @@ import com.vitaminC.kanaflash.ui.viewmodel.HomeViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.VocabularyViewModelFactory
 import com.vitaminC.kanaflash.ui.viewmodel.WritePracticeViewModelFactory
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +52,8 @@ fun KanaFlashNavGraph(
 ) {
     val navController = rememberNavController()
     var showLearnSheet by rememberSaveable { mutableStateOf(false) }
+    val learnButtonColor = Color(0xFF5F7F5F)
+    val learnButtonContentColor = Color(0xFFFFFBF5)
 
     NavHost(
         navController = navController,
@@ -244,34 +248,47 @@ fun KanaFlashNavGraph(
                             launchSingleTop = true
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = learnButtonColor,
+                        contentColor = learnButtonContentColor
+                    )
                 ) {
                     Text("Flashcards")
                 }
 
-                TextButton(
+                Button(
                     onClick = {
                         showLearnSheet = false
                         navController.navigate(KanaFlashRoutes.QUIZ) {
                             launchSingleTop = true
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = learnButtonColor,
+                        contentColor = learnButtonContentColor
+                    )
                 ) {
                     Text("Quiz")
                 }
 
-                TextButton(
+                Button(
                     onClick = {
                         showLearnSheet = false
                         navController.navigate(KanaFlashRoutes.WRITE) {
                             launchSingleTop = true
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = learnButtonColor,
+                        contentColor = learnButtonContentColor
+                    )
                 ) {
                     Text("Write")
                 }
+
             }
         }
     }

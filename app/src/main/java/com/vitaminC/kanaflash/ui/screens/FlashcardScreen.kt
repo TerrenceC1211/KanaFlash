@@ -12,12 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,6 +42,8 @@ import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.FlashcardViewModelFactory
 import com.vitaminC.kanaflash.ui.components.DeckSelectionMenu
+import com.vitaminC.kanaflash.ui.components.StudyOutlineButton
+import com.vitaminC.kanaflash.ui.components.StudyPrimaryButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -162,7 +162,7 @@ fun FlashcardScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        OutlinedButton(
+                        StudyOutlineButton(
                             onClick = {
                                 isShuffled = !isShuffled
                                 currentIndex = 0
@@ -270,7 +270,7 @@ fun FlashcardScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        OutlinedButton(
+                        StudyOutlineButton(
                             onClick = {
                                 if (currentIndex > 0) {
                                     currentIndex -= 1
@@ -283,14 +283,14 @@ fun FlashcardScreen(
                             Text("Previous")
                         }
 
-                        Button(
+                        StudyPrimaryButton(
                             onClick = { isAnswerVisible = !isAnswerVisible },
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(if (isAnswerVisible) "Hide" else "Reveal")
                         }
 
-                        OutlinedButton(
+                        StudyOutlineButton(
                             onClick = {
                                 if (currentIndex < deck.lastIndex) {
                                     currentIndex += 1
@@ -303,6 +303,7 @@ fun FlashcardScreen(
                             Text("Next")
                         }
                     }
+
                 }
             }
         }
@@ -331,7 +332,7 @@ private fun EmptyFlashcardState(
             modifier = Modifier.padding(top = 10.dp, bottom = 20.dp)
         )
 
-        Button(onClick = onDeckClick) {
+        StudyPrimaryButton(onClick = onDeckClick) {
             Text("Go to Deck")
         }
     }

@@ -12,13 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,6 +42,8 @@ import com.vitaminC.kanaflash.ui.components.KanaFlashBottomBar
 import com.vitaminC.kanaflash.ui.navigation.AppSection
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModel
 import com.vitaminC.kanaflash.ui.viewmodel.QuizViewModelFactory
+import com.vitaminC.kanaflash.ui.components.StudyOutlineButton
+import com.vitaminC.kanaflash.ui.components.StudyPrimaryButton
 
 private data class QuizQuestion(
     val prompt: VocabularyEntry,
@@ -326,14 +326,14 @@ fun QuizScreen(
 
                         if (selectedAnswer != null) {
                             if (isLastQuestion) {
-                                Button(
+                                StudyPrimaryButton(
                                     onClick = { onQuizFinished(score, questions.size) },
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text("Finish Quiz")
                                 }
                             } else {
-                                OutlinedButton(
+                                StudyOutlineButton(
                                     onClick = {
                                         currentQuestionIndex += 1
                                         selectedAnswer = null
@@ -344,6 +344,7 @@ fun QuizScreen(
                                 }
                             }
                         }
+
                     }
                 }
             }
@@ -374,8 +375,9 @@ private fun QuizMessageState(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Button(onClick = onButtonClick) {
+        StudyPrimaryButton(onClick = onButtonClick) {
             Text(buttonLabel)
         }
+
     }
 }
