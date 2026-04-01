@@ -10,15 +10,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,6 +44,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
@@ -84,6 +96,24 @@ fun WritePracticeScreen(
         currentPath = null
     }
 
+    fun moveToPreviousWord() {
+        if (currentIndex > 0) {
+            currentIndex -= 1
+            isAnswerVisible = false
+            clearCanvas()
+        }
+    }
+
+    fun moveToNextWord() {
+        if (currentIndex < vocabularyList.lastIndex) {
+            currentIndex += 1
+        } else {
+            currentIndex = 0
+        }
+        isAnswerVisible = false
+        clearCanvas()
+    }
+
     LaunchedEffect(vocabularyList) {
         currentIndex = 0
         isAnswerVisible = false
@@ -116,9 +146,9 @@ fun WritePracticeScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .padding(horizontal = 20.dp, vertical = 12.dp)
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Surface(
                 shape = RoundedCornerShape(999.dp),
@@ -159,6 +189,9 @@ fun WritePracticeScreen(
                     isAnswerVisible = isAnswerVisible,
                     strokes = strokes,
                     currentPath = currentPath,
+                    onToggleAnswer = {
+                        isAnswerVisible = !isAnswerVisible
+                    },
                     onCurrentPathChange = { updatedPath ->
                         currentPath = updatedPath
                     },
@@ -167,64 +200,77 @@ fun WritePracticeScreen(
                     }
                 )
 
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    Button(
+                        onClick = { moveToPreviousWord() },
+                        enabled = currentIndex > 0,
+                        modifier = Modifier.weight(1.1f)
                     ) {
-                        OutlinedButton(
-                            onClick = { undoLastStroke() },
-                            enabled = strokes.isNotEmpty(),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Undo")
-                        }
-
-                        OutlinedButton(
-                            onClick = {
-                                isAnswerVisible = false
-                                clearCanvas()
-                            },
-                            enabled = strokes.isNotEmpty() || currentPath != null || isAnswerVisible,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Clear")
-                        }
+                        Text("Back")
                     }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Button(
-                            onClick = {
-                                isAnswerVisible = !isAnswerVisible
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(if (isAnswerVisible) "Hide" else "Reveal")
-                        }
+                    ActionIconButton(
+                        onClick = { undoLastStroke() },
+                        enabled = strokes.isNotEmpty(),
+                        icon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Undo,
+                                contentDescription = "Undo stroke"
+                            )
+                        },
+                        modifier = Modifier.weight(0.9f)
+                    )
 
-                        Button(
-                            onClick = {
-                                if (currentIndex < vocabularyList.lastIndex) {
-                                    currentIndex += 1
-                                } else {
-                                    currentIndex = 0
-                                }
-                                isAnswerVisible = false
-                                clearCanvas()
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(if (currentIndex < vocabularyList.lastIndex) "Next" else "Restart")
-                        }
+                    ActionIconButton(
+                        onClick = {
+                            isAnswerVisible = false
+                            clearCanvas()
+                        },
+                        enabled = strokes.isNotEmpty() || currentPath != null || isAnswerVisible,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.CleaningServices,
+                                contentDescription = "Clear writing"
+                            )
+                        },
+                        modifier = Modifier.weight(0.9f)
+                    )
+
+                    Button(
+                        onClick = { moveToNextWord() },
+                        modifier = Modifier.weight(1.1f)
+                    ) {
+                        Text(if (currentIndex < vocabularyList.lastIndex) "Next" else "Restart")
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ActionIconButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    icon: @Composable () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FilledIconButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.height(48.dp),
+        colors = IconButtonDefaults.filledIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.primary,
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+        )
+    ) {
+        icon()
     }
 }
 
@@ -234,7 +280,7 @@ private fun WritePromptCard(
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(30.dp),
+        shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -243,12 +289,12 @@ private fun WritePromptCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 22.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = "Write the Japanese text for:",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -260,12 +306,14 @@ private fun WritePromptCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WritingPad(
     currentWord: VocabularyEntry,
     isAnswerVisible: Boolean,
     strokes: List<DrawStroke>,
     currentPath: Path?,
+    onToggleAnswer: () -> Unit,
     onCurrentPathChange: (Path?) -> Unit,
     onStrokeFinished: (Path) -> Unit
 ) {
@@ -276,8 +324,7 @@ private fun WritingPad(
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-
-        shape = RoundedCornerShape(30.dp),
+        shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -285,9 +332,9 @@ private fun WritingPad(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
                 text = "Writing Pad",
@@ -296,16 +343,16 @@ private fun WritingPad(
             )
 
             Text(
-                text = "Write the answer by hand, then reveal it to check.",
-                style = MaterialTheme.typography.bodyMedium,
+                text = "Write by hand, then tap the answer panel to reveal or hide it.",
+                style = MaterialTheme.typography.bodySmall,
                 color = onSurfaceVariantColor
             )
 
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp),
-                shape = RoundedCornerShape(22.dp),
+                    .height(104.dp),
+                shape = RoundedCornerShape(20.dp),
                 color = backgroundColor
             ) {
                 Canvas(
@@ -389,24 +436,38 @@ private fun WritingPad(
             }
 
             Surface(
+                onClick = onToggleAnswer,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp),
-                shape = RoundedCornerShape(22.dp),
+                    .height(104.dp),
+                shape = RoundedCornerShape(20.dp),
                 color = strokeColor.copy(alpha = 0.10f)
             ) {
                 if (isAnswerVisible) {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Text(
-                            text = "Correct Answer",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = strokeColor
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Correct Answer",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = strokeColor
+                            )
+
+                            Icon(
+                                imageVector = Icons.Filled.VisibilityOff,
+                                contentDescription = null,
+                                tint = strokeColor,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
 
                         Text(
                             text = currentWord.hiragana,
@@ -423,20 +484,26 @@ private fun WritingPad(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text(
-                            text = "Correct Answer",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = strokeColor.copy(alpha = 0.65f)
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Visibility,
+                                contentDescription = null,
+                                tint = strokeColor.copy(alpha = 0.7f),
+                                modifier = Modifier.size(18.dp)
+                            )
 
-                        Text(
-                            text = "Tap Reveal to show the answer here.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = onSurfaceVariantColor
-                        )
+                            Text(
+                                text = "Tap to reveal the correct answer",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = onSurfaceVariantColor
+                            )
+                        }
                     }
                 }
             }
