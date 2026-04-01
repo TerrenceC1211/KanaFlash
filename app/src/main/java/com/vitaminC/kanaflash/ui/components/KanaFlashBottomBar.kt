@@ -25,7 +25,7 @@ fun KanaFlashBottomBar(
 ) {
     Surface(
         tonalElevation = 0.dp,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f),
         modifier = Modifier.fillMaxWidth()
     ) {
 

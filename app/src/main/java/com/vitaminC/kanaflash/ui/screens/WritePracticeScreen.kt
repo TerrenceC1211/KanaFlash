@@ -30,9 +30,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
@@ -74,6 +74,13 @@ fun WritePracticeScreen(
 
     fun clearCanvas() {
         strokes.clear()
+        currentPath = null
+    }
+
+    fun undoLastStroke() {
+        if (strokes.isNotEmpty()) {
+            strokes.removeAt(strokes.lastIndex)
+        }
         currentPath = null
     }
 
@@ -160,42 +167,60 @@ fun WritePracticeScreen(
                     }
                 )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = {
-                            isAnswerVisible = false
-                            clearCanvas()
-                        },
-                        modifier = Modifier.weight(1f)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text("Clear")
+                        OutlinedButton(
+                            onClick = { undoLastStroke() },
+                            enabled = strokes.isNotEmpty(),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Undo")
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                isAnswerVisible = false
+                                clearCanvas()
+                            },
+                            enabled = strokes.isNotEmpty() || currentPath != null || isAnswerVisible,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Clear")
+                        }
                     }
 
-                    Button(
-                        onClick = {
-                            isAnswerVisible = !isAnswerVisible
-                        },
-                        modifier = Modifier.weight(1.2f)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text(if (isAnswerVisible) "Hide" else "Reveal")
-                    }
+                        Button(
+                            onClick = {
+                                isAnswerVisible = !isAnswerVisible
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(if (isAnswerVisible) "Hide" else "Reveal")
+                        }
 
-                    Button(
-                        onClick = {
-                            if (currentIndex < vocabularyList.lastIndex) {
-                                currentIndex += 1
-                            } else {
-                                currentIndex = 0
-                            }
-                            isAnswerVisible = false
-                            clearCanvas()
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(if (currentIndex < vocabularyList.lastIndex) "Next" else "Restart")
+                        Button(
+                            onClick = {
+                                if (currentIndex < vocabularyList.lastIndex) {
+                                    currentIndex += 1
+                                } else {
+                                    currentIndex = 0
+                                }
+                                isAnswerVisible = false
+                                clearCanvas()
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(if (currentIndex < vocabularyList.lastIndex) "Next" else "Restart")
+                        }
                     }
                 }
             }
@@ -221,18 +246,6 @@ private fun WritePromptCard(
                 .padding(horizontal = 24.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Surface(
-                shape = RoundedCornerShape(999.dp),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-            ) {
-                Text(
-                    text = "Prompt",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                )
-            }
-
             Text(
                 text = "Write the Japanese text for:",
                 style = MaterialTheme.typography.bodyLarge,
@@ -257,13 +270,13 @@ private fun WritingPad(
     onStrokeFinished: (Path) -> Unit
 ) {
     val strokeColor = MaterialTheme.colorScheme.primary
-    val backgroundColor = MaterialTheme.colorScheme.background
+    val backgroundColor = MaterialTheme.colorScheme.background.copy(alpha = 0.96f)
     val onSurfaceVariantColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val guideLineColor = onSurfaceVariantColor.copy(alpha = 0.12f)
 
     ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(if (isAnswerVisible) 300.dp else 220.dp),
+        modifier = Modifier.fillMaxWidth(),
+
         shape = RoundedCornerShape(30.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -282,10 +295,16 @@ private fun WritingPad(
                 color = strokeColor
             )
 
+            Text(
+                text = "Write the answer by hand, then reveal it to check.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = onSurfaceVariantColor
+            )
+
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .height(120.dp),
                 shape = RoundedCornerShape(22.dp),
                 color = backgroundColor
             ) {
@@ -331,6 +350,18 @@ private fun WritingPad(
                             )
                         }
                 ) {
+                    val sectionHeight = size.height / 4f
+
+                    for (index in 1..3) {
+                        val y = sectionHeight * index
+                        drawLine(
+                            color = guideLineColor,
+                            start = Offset(x = 0f, y = y),
+                            end = Offset(x = size.width, y = y),
+                            strokeWidth = 2f
+                        )
+                    }
+
                     strokes.forEach { stroke ->
                         drawPath(
                             path = stroke.path,
@@ -357,15 +388,19 @@ private fun WritingPad(
                 }
             }
 
-            if (isAnswerVisible) {
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = strokeColor.copy(alpha = 0.10f),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                shape = RoundedCornerShape(22.dp),
+                color = strokeColor.copy(alpha = 0.10f)
+            ) {
+                if (isAnswerVisible) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
                             text = "Correct Answer",
@@ -380,6 +415,25 @@ private fun WritingPad(
 
                         Text(
                             text = currentWord.meaning ?: "No meaning added",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = onSurfaceVariantColor
+                        )
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Correct Answer",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = strokeColor.copy(alpha = 0.65f)
+                        )
+
+                        Text(
+                            text = "Tap Reveal to show the answer here.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = onSurfaceVariantColor
                         )
